@@ -2713,36 +2713,259 @@ namespace NumpyDotNetTests
             //print(g);
         }
 
-        //[Ignore]
         [TestMethod]
         public void test_interp_1()
         {
             var xp = new float[] { 1, 2, 3 };
             var fp = new float[] { 3, 2, 0 };
-  
 
-            try
-            {
-                var a = np.interp(2.5, xp, fp);
-                print(a);
+            var a = np.interp(2.5, xp, fp);
+            AssertArray(a, new double[] { 1.0 });
+            print("a: ", a);  // 1.0
 
-                var b = np.interp(new double[] { 0, 1, 1.5, 2.72, 3.14 }, xp, fp);
-                print(b);
+            // 3.0, 3.0, 2.5, 0.56, 0.0
+            var xb = new double[] { 0, 1, 1.5, 2.72, 3.14 };
+            var b = np.interp(xb, xp, fp);
+            AssertArray(b, new double[] { 3.0  , 3.0 , 2.5, 0.56, 0.0 });
+            print(b);
+   
 
-                float UNDEF = -99.0f;
-                var c = np.interp(3.14, xp, fp, right: UNDEF);
-                print(c);
-            }
-            catch (NotImplementedException nie)
-            {
-                Console.WriteLine(nie.Message);
-                return;
-            }
+            float UNDEF = -99.0f;
 
-            Assert.Fail("This should have thrown an exception");
- 
+            var c = np.interp(new float[] { 3.14f }, xp, fp, right: UNDEF);
+            AssertArray(c, new double[] { -99 });
+
+            var d = np.interp(new float[] { 3.14f, -1f }, xp, fp, left: UNDEF, right: UNDEF);
+            AssertArray(d, new double[] { -99, -99 });
+
         }
 
+        [TestMethod]
+        public void test_interp_1a()
+        {
+            var xp = new double[] { 1, 2, 3 };
+            var fp = new double[] { 3, 2, 0 };
+
+            var a = np.interp(2.5, xp, fp);
+            AssertArray(a, new double[] { 1.0 });
+            print("a: ", a);  // 1.0
+
+            // 3.0, 3.0, 2.5, 0.56, 0.0
+            var xb = new double[] { 0, 1, 1.5, 2.72, 3.14 };
+            var b = np.interp(xb, xp, fp);
+            AssertArray(b, new double[] { 3.0, 3.0, 2.5, 0.56, 0.0 });
+            print(b);
+
+
+            float UNDEF = -99.0f;
+
+            var c = np.interp(new float[] { 3.14f }, xp, fp, right: UNDEF);
+            AssertArray(c, new double[] { -99 });
+
+            var d = np.interp(new float[] { 3.14f, -1f }, xp, fp, left: UNDEF, right: UNDEF);
+            AssertArray(d, new double[] { -99, -99 });
+
+        }
+
+        [TestMethod]
+        public void test_interp_1b()
+        {
+            var xp = new int[] { 1, 2, 3 };
+            var fp = new int[] { 3, 2, 0 };
+
+            var a = np.interp(2.5, xp, fp);
+            AssertArray(a, new double[] { 1.0 });
+            print("a: ", a);  // 1.0
+
+            // 3.0, 3.0, 2.5, 0.56, 0.0
+            var xb = new double[] { 0, 1, 1.5, 2.72, 3.14 };
+            var b = np.interp(xb, xp, fp);
+            AssertArray(b, new double[] { 3.0, 3.0, 2.5, 0.56, 0.0 });
+            print(b);
+
+
+            float UNDEF = -99.0f;
+
+            var c = np.interp(new float[] { 3.14f }, xp, fp, right: UNDEF);
+            AssertArray(c, new double[] { -99 });
+
+            var d = np.interp(new float[] { 3.14f, -1f }, xp, fp, left: UNDEF, right: UNDEF);
+            AssertArray(d, new double[] { -99, -99 });
+
+        }
+
+        [TestMethod]
+        public void test_interp_2()
+        {
+            //// with period
+            var x = new float[] { -180, -170, -185, 185, -10, -5, 0, 365 };
+            var xp = new float[] { 190, -190, 350, -350 };
+            var fp = new float[] { 5, 10, 3, 4 };
+            var a = np.interp(x, xp, fp, period: 360);
+            AssertArray(a, new double[] { 7.5, 5.0, 8.75, 6.25, 3.0, 3.25, 3.5, 3.75 });
+            print(a);
+        }
+
+        [TestMethod]
+        public void test_interp_NAN_1()
+        {
+            var xp = new float[] { 1, 2, 3 };
+            var fp = new float[] { 3, 2, 0 };
+
+            var a = np.interp(float.NaN, xp, fp);
+            AssertArray(a, new double[] { double.NaN });
+            print("a: ", a);  // 1.0
+
+            // 3.0, 3.0, 2.5, 0.56, 0.0
+            var xb = new double[] {double.NaN , 1, 1.5, double.NaN, 3.14 };
+            var b = np.interp(xb, xp, fp);
+            AssertArray(b, new double[] { double.NaN, 3.0, 2.5, double.NaN, 0.0 });
+            print(b);
+
+
+            float UNDEF = float.NaN;
+
+            var c = np.interp(new float[] { 3.14f }, xp, fp, right: UNDEF);
+            AssertArray(c, new double[] { double.NaN });
+
+            var d = np.interp(new float[] { 3.14f, -1f }, xp, fp, left: UNDEF, right: UNDEF);
+            AssertArray(d, new double[] { double.NaN, double.NaN });
+
+        }
+
+        [TestMethod]
+        public void test_interp_NAN_2()
+        {
+            var xp = new float[] { float.NaN, 2, 3 };
+            var fp = new float[] { 3, 2, float.NaN };
+
+            var a = np.interp(2.5, xp, fp);
+            AssertArray(a, new double[] { double.NaN });
+            print("a: ", a);  // 1.0
+
+            // 3.0, 3.0, 2.5, 0.56, 0.0
+            var xb = new double[] { 0, 1, 1.5, 2.72, 3.14 };
+            var b = np.interp(xb, xp, fp);
+            AssertArray(b, new double[] { double.NaN, double.NaN, double.NaN, double.NaN, double.NaN });
+            print(b);
+
+
+            float UNDEF = -99.0f;
+
+            var c = np.interp(new float[] { 3.14f }, xp, fp, right: UNDEF);
+            AssertArray(c, new double[] { -99 });
+            print(c);
+
+            var d = np.interp(new float[] { 3.14f, -1f }, xp, fp, left: UNDEF, right: UNDEF);
+            AssertArray(d, new double[] { -99, double.NaN });
+            print(d);
+
+        }
+
+        [TestMethod]
+        public void test_interp_INF_1()
+        {
+            var xp = new float[] { 1, 2, 3 };
+            var fp = new float[] { 3, 2, 0 };
+
+            var a = np.interp(float.PositiveInfinity, xp, fp);
+            AssertArray(a, new double[] { 0.0 });
+            print("a: ", a);  // 1.0
+
+            // 3.0, 3.0, 2.5, 0.56, 0.0
+            var xb = new double[] { double.PositiveInfinity, 1, 1.5, double.PositiveInfinity, 3.14 };
+            var b = np.interp(xb, xp, fp);
+            AssertArray(b, new double[] { 0.0, 3.0, 2.5, 0.0, 0.0 });
+            print(b);
+
+
+            float UNDEF = float.PositiveInfinity;
+
+            var c = np.interp(new float[] { 3.14f }, xp, fp, right: UNDEF);
+            AssertArray(c, new double[] { double.PositiveInfinity });
+
+            var d = np.interp(new float[] { 3.14f, -1f }, xp, fp, left: UNDEF, right: UNDEF);
+            AssertArray(d, new double[] { double.PositiveInfinity, double.PositiveInfinity });
+
+        }
+        [TestMethod]
+        public void test_interp_INF_1a()
+        {
+            var xp = new float[] { 1, 2, 3 };
+            var fp = new float[] { 3, 2, 0 };
+
+            var a = np.interp(float.NegativeInfinity, xp, fp);
+            AssertArray(a, new double[] { 3.0 });
+            print("a: ", a);  // 1.0
+
+            // 3.0, 3.0, 2.5, 0.56, 0.0
+            var xb = new double[] { double.NegativeInfinity, 1, 1.5, double.NegativeInfinity, 3.14 };
+            var b = np.interp(xb, xp, fp);
+            AssertArray(b, new double[] { 3.0, 3.0, 2.5, 3.0, 0.0 });
+            print(b);
+
+
+            float UNDEF = float.NegativeInfinity;
+
+            var c = np.interp(new float[] { 3.14f }, xp, fp, right: UNDEF);
+            AssertArray(c, new double[] { double.NegativeInfinity });
+
+            var d = np.interp(new float[] { 3.14f, -1f }, xp, fp, left: UNDEF, right: UNDEF);
+            AssertArray(d, new double[] { double.NegativeInfinity, double.NegativeInfinity });
+
+        }
+
+        [TestMethod]
+        public void test_interp_COMPLEX_1()
+        {
+            var xp = new float[] { 1, 2, 3 };
+            var fp = new Complex[] { new Complex(0,1), new Complex(0,0), new Complex(2,3) };
+
+            var a = np.interp(2.5, xp, fp);
+            AssertArray(a, new Complex[] { new Complex( 1.0, 1.5) });
+            print("a: ", a);  // 1.0
+
+            // 3.0, 3.0, 2.5, 0.56, 0.0
+            var xb = new double[] { 0, 1, 1.5, 2.72, 3.14 };
+            var b = np.interp(xb, xp, fp);
+            AssertArray(b, new Complex[] { new Complex(0, 1), new Complex(0, 1), new Complex(0, 0.5), new Complex(1.44, 2.16), new Complex(2, 3) });
+            print(b);
+
+
+            Complex UNDEF =  new Complex(-99.0, 88);
+
+            var c = np.interp(new float[] { 3.14f }, xp, fp, right: UNDEF);
+            AssertArray(c, new Complex[] { new Complex(-99, 88) });
+            print(c);
+
+            var d = np.interp(new float[] { 3.14f, -1f }, xp, fp, left: UNDEF, right: UNDEF);
+            AssertArray(d, new Complex[] { new Complex(-99, 88), new Complex(-99, 88) });
+            print(d);
+
+
+            float UNDEF2 = 66;
+
+            c = np.interp(new float[] { 3.14f }, xp, fp, right: UNDEF2);
+            AssertArray(c, new Complex[] { new Complex(66, 0) });
+            print(c);
+
+            d = np.interp(new float[] { 3.14f, -1f }, xp, fp, left: UNDEF2, right: UNDEF2);
+            AssertArray(d, new Complex[] { new Complex(66, 0), new Complex(66, 0) });
+            print(d);
+
+        }
+
+        [TestMethod]
+        public void test_interp_COMPLEX_2()
+        {
+            //// with period
+            var x = new Complex[] { -180, -170, -185, 185, -10, -5, 0, 365 };
+            var xp = new Complex[] { 190, -190, 350, -350 };
+            var fp = new Complex[] { 5, 10, 3, 4 };
+            var a = np.interp(x, xp, fp, period: 360);
+            AssertArray(a, new Complex[] { 7.5, 5.0, 8.75, 6.25, 3.0, 3.25, 3.5, 3.75 });
+            print(a);
+        }
 
         #endregion
 

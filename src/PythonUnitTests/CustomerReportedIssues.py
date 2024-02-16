@@ -1,5 +1,6 @@
 import unittest
 import numpy as np
+import time as tm
 from nptest import nptest
 
 class Test_CustomerReportedIssues(unittest.TestCase):
@@ -348,6 +349,264 @@ class Test_CustomerReportedIssues(unittest.TestCase):
          print(c)
 
 
+    def test_Rainyl_1a(self):
+
+         arr = np.array([ -9, 7, 5, 3, 1, -1, -3, -5,-11,13,17,21 ]).reshape(4, 3);
+         idx2 = np.argsort(arr)
+         print(arr)
+         print(idx2)
+
+         x = arr.T[0, :]
+         y = arr.T[1, :]
+
+         idx = np.argsort(x)
+         print(x);
+         print(idx);
+
+         idx = np.argsort(y)
+         print(y);
+         print(idx);
+
+    def test_Rainyl_1b(self):
+
+         arr = np.array([ -9, 7, 5, 3, 1, -1, -3, -5,-11,13,17,21 ], dtype=np.int16).reshape(4, 3);
+         idx2 = np.argsort(arr)
+         print(arr)
+         print(idx2)
+
+         x = arr.T[0, :]
+         y = arr.T[1, :]
+
+         idx = np.argsort(x)
+         print(x);
+         print(idx);
+
+    def test_Rainyl_2a(self):
+
+         arr = np.array([ 7, -9, -5, -3, 1, -1, 33, 5,-11,13,17,-21 ]).reshape(4, 3);
+         idx2 = np.argsort(arr)
+         print(arr)
+         print(idx2)
+
+         x = arr.T[:, 0]
+         y = arr.T[:, 1]
+
+         idx = np.argsort(x)
+         print(x);
+         print(idx);
+
+         idx = np.argsort(y)
+         print(y);
+         print(idx);
+
+    def test_Rainyl_3(self):
+
+        a = np.asarray([[1, 2, 3, 4, 5], [10, 11, 12, 13, 14]]);
+        b = a[:, ::-1]
+        print(b);
+       
+        
+        print("output:");print(b[0, 0]);print(b[0, 1]);print(b[0, 2]);print(b[0, 3]);print(b[0, 4]);
+        print("output:");print(b[1, 0]);print(b[1, 1]);print(b[1, 2]);print(b[1, 3]);print(b[1, 4]);
+
+    def test_Rainyl_3a(self):
+
+        a = np.asarray([[1, 2, 3, 4, 5], [10, 11, 12, 13, 14]]);
+        b = a[::-1, ::-1]
+        print(b);
+       
+        
+        print("output:");print(b[0, 0]);print(b[0, 1]);print(b[0, 2]);print(b[0, 3]);print(b[0, 4]);
+        print("output:");print(b[1, 0]);print(b[1, 1]);print(b[1, 2]);print(b[1, 3]);print(b[1, 4]);
+
+    def test_Rainyl_3b(self):
+
+        a = np.asarray([[1, 2, 3, 4, 5], [10, 11, 12, 13, 14]]);
+        b = a[::-2, ::-2]
+        print(b);
+       
+        print("output:");print(b[0, 0]);print(b[0, 1]);print(b[0, 2]);
+
+        b[0, 0] = 88;
+        b[0, 1] = 77;
+        b[0, 2] = 66;
+
+        print(a)
+
+
+    def test_Taz145_1(self):
+
+        arr1 = np.array([0,1,1,0,1,1,1,0,0,0,1,1,0,0,0,0,1,1,1,1,1,0,1,0]).reshape((2, 3, 4));
+        arr2 = np.arange(24).reshape((2, 3, 4));
+
+        print(arr2)
+        arr2 = np.rot90(arr2, k=2, axes= (0, 2));
+
+        print(arr2)
+        arr2[arr1 > 0] = 0;
+        print(arr2)
+
+    def test_Taz145_1a(self):
+
+        arr1 = np.array([0,1,1,0,1,1,1,0,0,0,1,1,0,0,0,0,1,1,1,1,1,0,1,0]).reshape((2, 3, 4));
+        arr2 = np.arange(24).reshape((2, 3, 4));
+
+        print(arr2)
+        arr2 = arr2[::-1]
+        print(arr2)
+        arr2[arr1 > 0] = 0;
+        print(arr2)
+
+    def test_Taz145_2(self):
+
+        arr1 = np.array([0,1,1,0,1,1,1,0,0,0,1,1,0,0,0,0,1,1,1,1,1,0,1,0]).reshape((2, 3, 4));
+        arr2 = np.arange(24).reshape((2, 3, 4));
+
+        print(arr2)
+        arr2 = np.rot90(arr2, k=2, axes= (0, 2));
+
+        print(arr2)
+        arr3 = arr2[arr1 > 0];
+        print(arr3)
+
+    def test_Taz145_2a(self):
+
+        arr1 = np.array([0,1,1,0,1,1,1,0,0,0,1,1,0,0,0,0,1,1,1,1,1,0,1,0]).reshape((2, 3, 4));
+        arr2 = np.arange(24).reshape((2, 3, 4));
+
+        print(arr2)
+        arr2 = arr2[::-1]
+
+        print(arr2)
+        arr3 = arr2[arr1 > 0];
+        print(arr3)
+
+    def test_Taz145_3(self):
+
+        arr1 = np.array([2,4,6], dtype=np.intp);
+        arr2 = np.arange(24);
+
+        arr2 = arr2[::-1];
+        print(arr2)
+        arr3 = arr2[arr1];
+        print(arr3)
+
+    def test_Taz145_3a(self):
+
+        arr2 = np.arange(24).reshape((2, 3, 4));
+        print(arr2)
+
+        arr2 = np.rot90(arr2, k=2, axes= (0, 2));
+        print(arr2)
+
+        arr3 = arr2[np.array([0, 1, -1, -2])];
+        print("arr3");
+        print(arr3)
+
+    def test_Taz145_4(self):
+
+        arr2 = np.arange(24).reshape((2, 3, 4));
+        arr2 = np.rot90(arr2, k=2, axes= (0, 2));
+
+        arr3 = np.array(arr2.tobytes());
+        print(arr3)
+
+        arr4 = np.array(arr2.tobytes(order='F'));
+        print(arr4)
+
+    def test_Taz145_4b(self):
+
+        arr2 = np.arange(24).reshape((2, 3, 4));
+        arr2 = arr2[::-1];
+
+        arr3 = np.array(arr2.tobytes());
+        print(arr3)
+
+        arr4 = np.array(arr2.tobytes(order='F'));
+        print(arr4)
+
+    def test_Sundarrajan06295_DifferentTypes(self):
+
+        x = np.arange(0, 4000 * 10 * 4000, dtype=np.uint32).reshape(-1, 4000);
+        y = np.arange(0, 4000 * 10 * 4000, dtype=np.float64).reshape(-1, 4000);
+
+        start = tm.time()
+   
+        z = np.multiply(x, y)
+
+        end = tm.time()
+
+        diff = end-start
+        print("DifferentTypes calculations took %f milliseconds" %(diff))
+
+    def test_Sundarrajan06295_SameTypes(self):
+
+        x = np.arange(0, 4000 * 10 * 4000, dtype=np.float64).reshape(-1, 4000);
+        y = np.arange(0, 4000 * 10 * 4000, dtype=np.float64).reshape(-1, 4000);
+
+        start = tm.time()
+   
+        z = np.multiply(x, y)
+
+        end = tm.time()
+
+        diff = end-start
+        print("SameTypes calculations took %f milliseconds" %(diff))
+
+    def test_Sundarrajan06295_SameTypes_2(self):
+
+        x = np.arange(0, 4000 * 10 * 4000, dtype=np.float64);
+        y = np.arange(0, 4000 * 10 * 4000, dtype=np.float64);
+
+        start = tm.time()
+   
+        z = np.multiply(x, y)
+
+        end = tm.time()
+
+        diff = end-start
+        print("SameTypes calculations took %f milliseconds" %(diff))
+
+    def test_Sundarrajan06295_Quantile_1(self):
+
+        x = np.arange(0, 4000 * 10 * 4000, dtype=np.float64);
+
+        start = tm.time()
+   
+        z = np.quantile(x, 0.5)
+
+        end = tm.time()
+
+        diff = end-start
+        print("SameTypes calculations took %f milliseconds" %(diff))
+
+    def test_Sundarrajan06295_var_1(self):
+
+        data = np.arange(3815 * 2800, dtype = np.float32).reshape(3815,2800);
+   
+        start = tm.time()
+   
+        variance = np.var(data, axis=1)
+        #print(variance)
+
+        variance = np.var(data, axis=0)
+        #print(variance)
+
+
+        end = tm.time()
+
+        diff = end-start
+        print("var calculations took %f milliseconds" %(diff))
+
+    def test_DeanZhuo_convolve_1(self):
+
+        hlpf = np.arange(27, dtype = np.int64);
+        hhpf = np.arange(35, dtype = np.int64);
+
+        a = np.convolve(hlpf, hhpf, "full")
+        print(a.size)
+        print(a)
+   
       
 if __name__ == '__main__':
     unittest.main()

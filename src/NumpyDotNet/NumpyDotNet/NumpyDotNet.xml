@@ -10,6 +10,9 @@
             class has functionality corresponding to functions in arrayobject.c,
             ctors.c, and multiarraymodule.c
             </summary>
+            <summary>
+            implements functions similar to npyio.py
+            </summary>
         </member>
         <member name="M:NumpyDotNet.np.ediff1d(NumpyDotNet.ndarray,NumpyDotNet.ndarray,NumpyDotNet.ndarray)">
             <summary>
@@ -869,7 +872,18 @@
             <param name="axis">The axis along which the difference is taken, default is the last axis.</param>
             <returns></returns>
         </member>
-        <!-- Badly formed XML comment ignored for member "M:NumpyDotNet.np.interp(System.Object,System.Single[],System.Single[],System.Nullable{System.Single},System.Nullable{System.Single},System.Nullable{System.Single})" -->
+        <member name="M:NumpyDotNet.np.interp(System.Object,System.Object,System.Object,System.Object,System.Object,System.Nullable{System.Double})">
+            <summary>
+            One-dimensional linear interpolation.
+            </summary>
+            <param name="x">The x-coordinates of the interpolated values.</param>
+            <param name="xp">1-D sequence of floats, the x-coordinates of the data points</param>
+            <param name="fp">1-D sequence of float or complex, the y-coordinates of the data points</param>
+            <param name="left"> optional float or complex corresponding to fp value to return for "x LT xp[0]"</param>
+            <param name="right">optional float or complex corresponding to fp value to return for "x GT xp[-1]"</param>
+            <param name="period">A period for the x-coordinates. This parameter allows the proper interpolation of angular x-coordinates.</param>
+            <returns></returns>
+        </member>
         <member name="M:NumpyDotNet.np.angle(System.Object,System.Boolean)">
             <summary>
             Return the angle of the complex argument.
@@ -2903,6 +2917,12 @@
             <param name="aobjects">Input parameters.</param>
             <returns></returns>
         </member>
+        <member name="P:NumpyDotNet.np.tuning.EnableTryCatchOnCalculations">
+            <summary>
+            enable/disable try catch around calculations.  
+            Disabling will likely increase performance but crash the application if exception taken during calculation
+            </summary>
+        </member>
         <member name="M:NumpyDotNet.np.CopyObject(NumpyDotNet.ndarray,System.Object)">
             <summary>
             Copies the source object into the destination array.  src can be
@@ -3351,6 +3371,9 @@
             <param name="a1">Input array</param>
             <param name="a2">Input array</param>
             <returns></returns>
+        </member>
+        <member name="F:NumpyDotNet.np.random_serializable.has_binomial">
+            * The rk_state structure has been extended to store the following
         </member>
         <member name="M:NumpyDotNet.np.atleast_1d(System.Collections.Generic.ICollection{System.Object})">
             <summary>
@@ -3854,6 +3877,36 @@
             Return a copy of the array collapsed into one dimension.
             </summary>
             <param name="order">{‘C’, ‘F’, ‘A’, ‘K’}, optional</param>
+            <returns></returns>
+        </member>
+        <member name="M:NumpyDotNet.ndarray.item_byindex(System.Int32[])">
+            <summary>
+            This function will allow specifying index with an array.
+            Instead of specifying and item like a[1,2,3] can use a[new int[] {1,2,3}];
+            </summary>
+            <param name="args">an array with index values to select specific items</param>
+            <returns></returns>
+        </member>
+        <member name="M:NumpyDotNet.ndarray.item_byindex(System.Int64[])">
+            <summary>
+            This function will allow specifying index with an array.
+            Instead of specifying and item like a[1,2,3] can use a[new int[] {1,2,3}];
+            </summary>
+            <param name="args">an array with index values to select specific items</param>
+            <returns></returns>
+        </member>
+        <member name="M:NumpyDotNet.ndarray.item(System.Object[])">
+            <summary>
+            This function will allow specifying items via collection of index types.
+            </summary>
+            <param name="args">a collection if index items</param>
+            <returns></returns>
+        </member>
+        <member name="M:NumpyDotNet.ndarray.itemset(System.Object[])">
+            <summary>
+            This function will allow specifying items via collection of index types.
+            </summary>
+            <param name="args">a collection if index items</param>
             <returns></returns>
         </member>
         <member name="M:NumpyDotNet.ndarray.newbyteorder(System.String)">
@@ -4573,11 +4626,18 @@
             <returns></returns>
         </member>
         <!-- Badly formed XML comment ignored for member "M:NumpyDotNet.NumpyExtensions.ToList``1(NumpyDotNet.ndarray)" -->
-        <member name="M:NumpyDotNet.NumpyExtensions.ToArray``1(NumpyDotNet.ndarray)">
+        <member name="M:NumpyDotNet.NumpyExtensions.ToArray(NumpyDotNet.ndarray)">
             <summary>
             Converts ndarray data items into a raw data array
             </summary>
             <typeparam name="T"></typeparam>
+            <param name="a"></param>
+            <returns></returns>
+        </member>
+        <member name="M:NumpyDotNet.NumpyExtensions.ToSystemArray(NumpyDotNet.ndarray)">
+            <summary>
+            Converts ndarray data items into a raw data array
+            </summary>
             <param name="a"></param>
             <returns></returns>
         </member>
@@ -5356,6 +5416,11 @@
             convert an ndarray of integers into a shape
             </summary>
             <param name="arr"></param>
+        </member>
+        <member name="M:NumpyDotNet.shape.#ctor">
+            <summary>
+            default constructor needed for serialization
+            </summary>
         </member>
         <member name="M:NumpyDotNet.shape.#ctor(System.Collections.Generic.IEnumerable{System.Int32})">
             <summary>

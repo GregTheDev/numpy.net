@@ -1764,6 +1764,118 @@ class MathematicalFunctionsTests(unittest.TestCase):
         c = np.interp(3.14, xp, fp, right=UNDEF)
         print(c)
 
+        d = np.interp([3.14, -1], xp, fp, left=UNDEF, right=UNDEF)
+        print(d)
+
+    def test_interp_NAN_1(self):
+
+        xp = xp = [1, 2, 3]
+        fp = [3, 2, 0]
+        a = np.interp(np.NaN, xp, fp)
+        print(a)
+
+        b = np.interp([np.NaN, 1, 1.5, np.NaN, 3.14], xp, fp)
+        print(b)
+
+        UNDEF = np.NaN
+        c = np.interp(3.14, xp, fp, right=UNDEF)
+        print(c)
+
+        d = np.interp([3.14, -1], xp, fp, left=UNDEF, right=UNDEF)
+        print(d)
+
+    def test_interp_NAN_2(self):
+
+        xp = xp = [np.NaN, 2, 3]
+        fp = [3, 2, np.NaN]
+        a = np.interp(2.5, xp, fp)
+        print(a)
+
+        b = np.interp([0, 1, 1.5, 2.72, 3.14], xp, fp)
+        print(b)
+
+        UNDEF = -99.0
+        c = np.interp(3.14, xp, fp, right=UNDEF)
+        print(c)
+
+        d = np.interp([3.14, -1], xp, fp, left=UNDEF, right=UNDEF)
+        print(d)
+
+    def test_interp_INF_1(self):
+
+        xp = xp = [1, 2, 3]
+        fp = [3, 2, 0]
+        a = np.interp(np.Inf, xp, fp)
+        print(a)
+
+        b = np.interp([np.Inf, 1, 1.5, np.Inf, 3.14], xp, fp)
+        print(b)
+
+        UNDEF = np.Inf
+        c = np.interp(3.14, xp, fp, right=UNDEF)
+        print(c)
+
+        d = np.interp([3.14, -1], xp, fp, left=UNDEF, right=UNDEF)
+        print(d)
+
+    def test_interp_INF_1a(self):
+
+        xp = xp = [1, 2, 3]
+        fp = [3, 2, 0]
+        a = np.interp(-np.Inf, xp, fp)
+        print(a)
+
+        b = np.interp([-np.Inf, 1, 1.5, -np.Inf, 3.14], xp, fp)
+        print(b)
+
+        UNDEF = -np.Inf
+        c = np.interp(3.14, xp, fp, right=UNDEF)
+        print(c)
+
+        d = np.interp([3.14, -1], xp, fp, left=UNDEF, right=UNDEF)
+        print(d)
+
+    def test_interp_2(self):
+
+        x = [-180, -170, -185, 185, -10, -5, 0, 365]
+        xp = [190, -190, 350, -350]
+        fp = [5, 10, 3, 4]
+        a = np.interp(x, xp, fp, period=360)
+        print(a)
+
+
+    def test_interp_COMPLEX_1(self):
+
+        xp = xp = [1, 2, 3]
+        fp = [1.0j, 0, 2+3j]
+        a = np.interp(2.5, xp, fp)
+        print(a)
+
+        b = np.interp([0, 1, 1.5, 2.72, 3.14], xp, fp)
+        print(b)
+
+        UNDEF = -99+88j
+        c = np.interp(3.14, xp, fp, right=UNDEF)
+        print(c)
+
+        d = np.interp([3.14, -1], xp, fp, left=UNDEF, right=UNDEF)
+        print(d)
+
+        UNDEF = 66
+        c = np.interp(3.14, xp, fp, right=UNDEF)
+        print(c)
+
+        d = np.interp([3.14, -1], xp, fp, left=UNDEF, right=UNDEF)
+        print(d)
+
+
+    def test_interp_COMPLEX_2(self):
+
+        x = [-180, -170, -185, 185, -10, -5, 0, 365]
+        xp = [190, -190, 350, -350]
+        fp = [5+0j, 10+0j, 3+0j, 4+0j]
+        a = np.interp(x, xp, fp, period=360)
+        print(a)
 
     #endregion
 

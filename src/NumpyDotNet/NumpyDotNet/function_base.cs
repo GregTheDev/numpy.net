@@ -1054,17 +1054,18 @@ namespace NumpyDotNet
         #endregion
 
         #region interp
+   
         /// <summary>
         /// One-dimensional linear interpolation.
         /// </summary>
         /// <param name="x">The x-coordinates of the interpolated values.</param>
         /// <param name="xp">1-D sequence of floats, the x-coordinates of the data points</param>
         /// <param name="fp">1-D sequence of float or complex, the y-coordinates of the data points</param>
-        /// <param name="left"> optional float or complex corresponding to fp value to return for `x < xp[0]`</param>
-        /// <param name="right">optional float or complex corresponding to fp value to return for `x > xp[-1]</param>
+        /// <param name="left"> optional float or complex corresponding to fp value to return for "x LT xp[0]"</param>
+        /// <param name="right">optional float or complex corresponding to fp value to return for "x GT xp[-1]"</param>
         /// <param name="period">A period for the x-coordinates. This parameter allows the proper interpolation of angular x-coordinates.</param>
         /// <returns></returns>
-        public static ndarray interp(object x, float[] xp, float[] fp, float? left = null, float? right = null, float? period = null)
+        public static ndarray interp(object x, object xp, object fp, object left = null, object right = null, double? period = null)
         {
             /*
             One-dimensional linear interpolation.
@@ -1160,7 +1161,275 @@ namespace NumpyDotNet
             array([ 0.+1.j ,  1.+1.5j])
              */
 
-            throw new NotImplementedException("use https://numerics.mathdotnet.com/ instead");
+            interp_func interp_func = null;
+            dtype input_dtype = null;
+
+            var __fp = asarray(fp);
+            if (__fp.IsComplex)
+            {
+                interp_func = interp_func_complex;
+                input_dtype = np.Complex;
+            }
+            else
+            {
+                interp_func = interp_func_double;
+                input_dtype = np.Float64;
+            }
+
+            var _x = asarray(x, dtype: np.Float64) ?? throw new ArgumentNullException("x");
+            var _xp = asarray(xp, dtype: np.Float64) ?? throw new ArgumentNullException("xp");
+            var _fp = asarray(fp, dtype: input_dtype) ?? throw new ArgumentNullException("fp");
+                      
+
+            if (_x.ndim > 1 || _xp.ndim != 1 || _fp.ndim != 1) throw new ArgumentException("x, xp, fp must be 1-D array");
+            if (_x.size == 0 || _xp.size == 0 || _fp.size == 0) throw new ArgumentException("x, xp, fp can't be empty array");
+            if (_xp.size != _fp.size) throw new ArgumentException("xp and fp must have equal size");
+            if (period != null)
+            {
+                if (period == 0) throw new ArgumentException("period must be a non-zero value");
+                period = period < 0 ? -period : period;
+                _x %= period;
+                _xp %= period;
+                var asort_xp = np.argsort(_xp);
+                _xp = _xp[asort_xp] as ndarray;
+                _fp = _fp[asort_xp] as ndarray;
+                _xp = np.concatenate((_xp["-1:"] as ndarray - period, _xp, _xp["0:1"] as ndarray + period));
+                _fp = np.concatenate((_fp["-1:"], _fp, _fp["0:1"]));
+            }
+            
+            if (interp_func != null)
+            {
+                return interp_func(x: _x, xp: _xp, fp: _fp, left: left, right: right);
+            }
+
+            throw new Exception("Unable to determine float or complex type");
+        }
+
+        private delegate ndarray interp_func(ndarray x, ndarray xp, ndarray fp, object left = null, object right = null);
+
+        private static ndarray interp_func_double(ndarray x, ndarray xp, ndarray fp, object left = null, object right = null)
+        {
+            var dx = xp.AsDoubleArray();
+            var dy = fp.AsDoubleArray();
+            var dz = x.AsDoubleArray();
+            int lenxp = dx.Length; int lenx = dz.Length;
+            var lval = left is null ? dy[0] : Convert.ToDouble(left);
+            var rval = right is null ? dy[lenxp - 1] : Convert.ToDouble(right);
+            var dres = new double[lenx];
+            double[] slopes = null;
+
+            if (lenxp == 1)
+            {
+                var xp_val = dx[0];
+                var fp_val = dy[0];
+                for (int i = 0; i < lenx; ++i)
+                {
+                    var x_val = dz[i];
+                    dres[i] = (x_val < xp_val) ? lval : ((x_val > xp_val) ? rval : fp_val);
+                }
+            }
+            else
+            {
+                int j = 0;
+                if (lenxp <= lenx)
+                {
+                    slopes = new double[lenxp - 1];
+                    for (int i = 0; i < lenxp - 1; ++i)
+                        slopes[i] = (dy[i + 1] - dy[i]) / (dx[i + 1] - dx[i]);
+                }
+
+                for (int i = 0; i < lenx; ++i)
+                {
+                    var x_val = dz[i];
+                    if (double.IsNaN(x_val))
+                    {
+                        dres[i] = x_val;
+                        continue;
+                    }
+
+                    j = binary_search_with_guess(x_val, dx, j);
+                    if (j == -1) dres[i] = lval;
+                    else if (j == lenxp) dres[i] = rval;
+                    else if (j == lenxp - 1) dres[i] = dy[j];
+                    else if (dx[j] == x_val) dres[i] = dy[j];
+                    else
+                    {
+                        var slope = (slopes != null) ? slopes[j] : (dy[j + 1] - dy[j]) / (dx[j + 1] - dx[j]);
+                        /* If we get nan in one direction, try the other */
+                        dres[i] = slope * (x_val - dx[j]) + dy[j];
+                        if (Unlikely(double.IsNaN(dres[i])))
+                        {
+                            dres[i] = slope * (x_val - dx[j + 1]) + dy[j + 1];
+                            if (Unlikely(double.IsNaN(dres[i])) && dy[j] == dy[j+1])
+                                dres[i] = dy[j];
+                        }
+                    }
+                }
+            }
+            return asarray(dres, np.Float64);
+        }
+
+        private static ndarray interp_func_complex(ndarray x, ndarray xp, ndarray fp, object left = null, object right = null)
+        {
+
+            var dx = xp.AsDoubleArray();
+            var dy = fp.AsComplexArray();
+            var dz = x.AsDoubleArray();
+            int lenxp = dx.Length; int lenx = dz.Length;
+            System.Numerics.Complex lval;
+            System.Numerics.Complex rval;
+            var dres = new System.Numerics.Complex[lenx];
+            System.Numerics.Complex[] slopes = null;
+
+            if (left is null)
+                lval = dy[0];
+            else if (left is System.Numerics.Complex)
+                lval = (System.Numerics.Complex)left;
+            else
+                lval = new System.Numerics.Complex(Convert.ToDouble(left), 0);
+
+            if (right is null)
+                rval = dy[lenxp-1];
+            else if (right is System.Numerics.Complex)
+                rval = (System.Numerics.Complex)right;
+            else
+                rval = new System.Numerics.Complex(Convert.ToDouble(right), 0);
+
+            if (lenxp == 1)
+            {
+                var xp_val = dx[0];
+                var fp_val = dy[0];
+                for (int i = 0; i < lenx; i++)
+                {
+                    var x_val = dz[i];
+                    dres[i] = (x_val < xp_val) ? lval : ((x_val > xp_val) ? rval : fp_val);
+                }
+            }
+            else
+            {
+                int j = 0;
+                if (lenxp <= lenx)
+                {
+                    slopes = new System.Numerics.Complex[lenxp - 1];
+                    for (int i = 0; i < lenxp - 1; ++i)
+                    {
+                        double inv_dx = 1.0 / (dx[i + 1] - dx[i]);
+                        double _real = (dy[i + 1].Real - dy[i].Real) * inv_dx;
+                        double _imaginary = (dy[i + 1].Imaginary - dy[i].Imaginary) * inv_dx;
+                        slopes[i] = new System.Numerics.Complex(_real, _imaginary);
+                    }
+                }
+
+                for (int i = 0; i < lenx; ++i)
+                {
+                    var x_val = dz[i];
+                    if (double.IsNaN(x_val))
+                    {
+                        dres[i] = new System.Numerics.Complex(x_val, 0.0);
+                        continue;
+                    }
+
+                    j = binary_search_with_guess(x_val, dx, j);
+                    if (j == -1) dres[i] = lval;
+                    else if (j == lenxp) dres[i] = rval;
+                    else if (j == lenxp - 1) dres[i] = dy[j];
+                    else if (dx[j] == x_val) dres[i] = dy[j];
+                    else
+                    {
+                        System.Numerics.Complex slope;
+
+                        if (slopes != null)
+                        {
+                            slope = slopes[j];
+                        }
+                        else
+                        {
+                            double inv_dx = 1.0 / (dx[j + 1] - dx[j]);
+                            double _real = (dy[j + 1].Real - dy[j].Real) * inv_dx;
+                            double _imaginary = (dy[j + 1].Imaginary - dy[j].Imaginary) * inv_dx;
+                            slope = new System.Numerics.Complex(_real, _imaginary);
+                        }
+                        /* If we get nan in one direction, try the other */
+                        dres[i]  = new System.Numerics.Complex(slope.Real * (x_val - dx[j]) + dy[j].Real, dres[i].Imaginary);
+                        if (Unlikely(double.IsNaN(dres[i].Real)))
+                        {
+                            dres[i] = new System.Numerics.Complex(slope.Real * (x_val - dx[j + 1]) + dy[j + 1].Real, dres[i].Imaginary);
+                            if (Unlikely(double.IsNaN(dres[i].Real)) && dy[j].Real == dy[j + 1].Real)
+                                dres[i] = new System.Numerics.Complex(dy[j].Real, dres[i].Imaginary);
+                        }
+
+                        dres[i] = new System.Numerics.Complex(dres[i].Real, slope.Imaginary * (x_val - dx[j]) + dy[j].Imaginary);
+                        if (Unlikely(double.IsNaN(dres[i].Imaginary)))
+                        {
+                            dres[i] = new System.Numerics.Complex(dres[i].Real, slope.Imaginary * (x_val - dx[j + 1]) + dy[j + 1].Imaginary);
+                            if (Unlikely(double.IsNaN(dres[i].Imaginary)) && dy[j].Imaginary == dy[j + 1].Imaginary)
+                                dres[i] = new System.Numerics.Complex(dres[i].Real, dy[j].Imaginary );
+                        }
+
+                    }
+                }
+            }
+            return asarray(dres, np.Complex);
+        }
+
+        private static bool Unlikely(bool v)
+        {
+            return v;
+        }
+
+        private static int binary_search_with_guess(double key, double[] arr, int guess)
+        {
+            int imin = 0, imax = arr.Length, len = arr.Length;
+            int LIKELY_IN_CACHE_SIZE = 8;
+            if (key > arr[len - 1]) return len;
+            if (key < arr[0]) return -1;
+            /*
+             * If len <= 4 use linear search.
+             * From above we know key >= arr[0] when we start.
+             */
+            if (len <= 4)
+            {
+                int i = 1;
+                for (; i < len && key >= arr[i]; i++) ;
+                return i - 1;
+            }
+            guess = guess > len - 3 ? len - 3 : ((guess < 1) ? 1 : guess);
+
+            /* check most likely values: guess - 1, guess, guess + 1 */
+            if (key < arr[guess])
+            {
+                if (key < arr[guess - 1])
+                {
+                    imax = guess - 1;
+                    /* last attempt to restrict search to items in cache */
+                    if (guess > LIKELY_IN_CACHE_SIZE && key >= arr[guess - LIKELY_IN_CACHE_SIZE])
+                        imin = guess - LIKELY_IN_CACHE_SIZE;
+                }
+                else
+                    /* key >= arr[guess - 1] */
+                    return guess - 1;
+            }
+            else
+            {
+                /* key >= arr[guess] */
+                if (key < arr[guess + 1]) return guess;
+                /* key >= arr[guess + 1] */
+                if (key < arr[guess + 2]) return guess + 1;
+                /* key >= arr[guess + 2] */
+                imin = guess + 2;
+                /* last attempt to restrict search to items in cache */
+                if (guess < len - LIKELY_IN_CACHE_SIZE - 1 && key < arr[guess + LIKELY_IN_CACHE_SIZE])
+                    imax = guess + LIKELY_IN_CACHE_SIZE;
+            }
+
+            /* finally, find index by bisection */
+            while (imin < imax)
+            {
+                int imid = imin + ((imax - imin) >> 1);
+                if (key >= arr[imid]) imin = imid + 1;
+                else imax = imid;
+            }
+            return imin - 1;
         }
         #endregion
 
@@ -3631,7 +3900,7 @@ namespace NumpyDotNet
                     indices = concatenate((new ndarray[] { indices, np.array(new int[] { -1 }) }));
                 }
 
-                ap = ap.partition(indices.ToArray<npy_intp>(), axis: axis);
+                ap = ap.partition((npy_intp[])indices.ToArray(), axis: axis);
                 // ensure axis with qth is first
                 ap = np.moveaxis(ap, axis, 0);
                 axis = 0;
@@ -3672,7 +3941,7 @@ namespace NumpyDotNet
                 weights_below = weights_below.reshape(new shape(weights_shape));
                 weights_above = weights_above.reshape(new shape(weights_shape));
 
-                ap = ap.partition(concatenate(((object)indices_below, indices_above)).ToArray<npy_intp>(), axis: axis);
+                ap = ap.partition((npy_intp[])concatenate(((object)indices_below, indices_above)).ToArray(), axis: axis);
 
                 // ensure axis with qth is first
                 ap = np.moveaxis(ap, axis, 0);

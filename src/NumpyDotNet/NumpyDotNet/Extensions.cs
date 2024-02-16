@@ -660,26 +660,855 @@ namespace NumpyDotNet
             }
 
         }
+
+
         /// <summary>
         /// Converts ndarray data items into a raw data array
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="a"></param>
         /// <returns></returns>
-        public static T[] ToArray<T>(this ndarray a)
+        public static System.Array ToArray(this ndarray a)
         {
-            if (a.IsASlice)
-            {
-                List<T> Data = a.ToList<T>();
-                return Data.ToArray();
-            }
-            else
-            {
-                T[] data = (T[])a.rawdata(0).datap;
-                return data;
-            }
- 
+            ndarray b = a.ravel();
+            return b.ToSystemArray();
         }
+        /// <summary>
+        /// Converts ndarray data items into a raw data array
+        /// </summary>
+        /// <param name="a"></param>
+        /// <returns></returns>
+        public static System.Array ToSystemArray(this ndarray a)
+        {
+            switch (a.TypeNum)
+            {
+                case NPY_TYPES.NPY_BOOL:
+                    return ConvertToMultiDimArray<bool>(a);
+
+                case NPY_TYPES.NPY_BYTE:
+                    return ConvertToMultiDimArray<sbyte>(a);
+
+                case NPY_TYPES.NPY_UBYTE:
+                    return ConvertToMultiDimArray<byte>(a);
+
+                case NPY_TYPES.NPY_INT16:
+                    return ConvertToMultiDimArray<Int16>(a);
+
+                case NPY_TYPES.NPY_UINT16:
+                    return ConvertToMultiDimArray<UInt16>(a);
+
+                case NPY_TYPES.NPY_INT32:
+                    return ConvertToMultiDimArray<Int32>(a);
+
+                case NPY_TYPES.NPY_UINT32:
+                    return ConvertToMultiDimArray<UInt32>(a);
+
+                case NPY_TYPES.NPY_INT64:
+                    return ConvertToMultiDimArray<Int64>(a);
+
+                case NPY_TYPES.NPY_UINT64:
+                    return ConvertToMultiDimArray<UInt64>(a);
+
+                case NPY_TYPES.NPY_FLOAT:
+                    return ConvertToMultiDimArray<float>(a);
+
+                case NPY_TYPES.NPY_DOUBLE:
+                    return ConvertToMultiDimArray<double>(a);
+
+                case NPY_TYPES.NPY_DECIMAL:
+                    return ConvertToMultiDimArray<decimal>(a);
+
+                case NPY_TYPES.NPY_COMPLEX:
+                    return ConvertToMultiDimArray<System.Numerics.Complex>(a);
+
+                case NPY_TYPES.NPY_BIGINT:
+                    return ConvertToMultiDimArray<System.Numerics.BigInteger>(a);
+
+                case NPY_TYPES.NPY_OBJECT:
+                    return ConvertToMultiDimArray<System.Object>(a);
+
+                case NPY_TYPES.NPY_STRING:
+                    return ConvertToMultiDimArray<System.String>(a);
+
+                default:
+                    throw new Exception("unable to convert ndarray of this type to MultiDim .NET array");
+            }
+
+        }
+
+        private static Array ConvertToMultiDimArray<T>(ndarray a)
+        {
+            Array array = Array.CreateInstance(typeof(T), a.dims);
+            npy_intp[] indexes = new npy_intp[array.Rank];
+
+            int count = 0;
+            while (true)
+            {
+                array.SetValue((T)a.item_byindex(indexes), indexes);
+                count++;
+
+                for (int i = array.Rank - 1; i >= 0; i--)
+                {
+                    if (indexes[i] < array.GetLength(i) - 1)
+                    {
+                        indexes[i]++;
+                        break;
+                    }
+                    else
+                    {
+                        indexes[i] = 0;
+                        if (i == 0)
+                        {
+                            return array;
+                        }
+                    }
+                }
+            }
+        }
+
+#if Not_used // replaced by ConvertToMultiDimArray above
+        private static Array ConvertToMultiDimArrayx<T>(ndarray a)
+        {
+            if (a.ndim == 1)
+            {
+                return ConvertTo1dArray<T>(a);
+            }
+            if (a.ndim == 2)
+            {
+                return ConvertTo2dArray<T>(a);
+            }
+            if (a.ndim == 3)
+            {
+                return ConvertTo3dArray<T>(a);
+            }
+            if (a.ndim == 4)
+            {
+                return ConvertTo4dArray<T>(a);
+            }
+            if (a.ndim == 5)
+            {
+                return ConvertTo5dArray<T>(a);
+            }
+            if (a.ndim == 6)
+            {
+                return ConvertTo6dArray<T>(a);
+            }
+            if (a.ndim == 7)
+            {
+                return ConvertTo7dArray<T>(a);
+            }
+            if (a.ndim == 8)
+            {
+                return ConvertTo8dArray<T>(a);
+            }
+            if (a.ndim == 9)
+            {
+                return ConvertTo9dArray<T>(a);
+            }
+            if (a.ndim == 10)
+            {
+                return ConvertTo10dArray<T>(a);
+            }
+            if (a.ndim == 11)
+            {
+                return ConvertTo11dArray<T>(a);
+            }
+            if (a.ndim == 12)
+            {
+                return ConvertTo12dArray<T>(a);
+            }
+            if (a.ndim == 13)
+            {
+                return ConvertTo13dArray<T>(a);
+            }
+            if (a.ndim == 14)
+            {
+                return ConvertTo14dArray<T>(a);
+            }
+            if (a.ndim == 15)
+            {
+                return ConvertTo15dArray<T>(a);
+            }
+            if (a.ndim == 16)
+            {
+                return ConvertTo16dArray<T>(a);
+            }
+            if (a.ndim == 17)
+            {
+                return ConvertTo17dArray<T>(a);
+            }
+            if (a.ndim == 18)
+            {
+                return ConvertTo18dArray<T>(a);
+            }
+
+            throw new Exception(string.Format("Can't convert {0}D array.  Max dims supported is 18", a.ndim));
+        }
+        private static System.Array ConvertTo1dArray<T>(ndarray nd)
+        {
+            if (!nd.IsASlice)
+            {
+                System.Array data = (System.Array)nd.rawdata(0).datap;
+                return (System.Array)data;
+            }
+
+            T[] output = new T[nd.dims[0]];
+
+            for (int i = 0; i < nd.dims[0]; i++)
+            {
+                output[i] = (T)nd[i];
+            }
+
+            return output;
+        }
+        private static System.Array ConvertTo2dArray<T>(ndarray nd)
+        {
+            T[,] output = new T[nd.dims[0], nd.dims[1]];
+
+            for (int i = 0; i < nd.dims[0]; i++)
+            {
+                for (int j = 0; j < nd.dims[1]; j++)
+                {
+                    output[i, j] = (T)nd[i, j];
+                }
+            }
+
+            return output;
+        }
+        private static System.Array ConvertTo3dArray<T>(ndarray nd)
+        {
+            T[,,] output = new T[nd.dims[0], nd.dims[1], nd.dims[2]];
+
+            for (int i = 0; i < nd.dims[0]; i++)
+            {
+                for (int j = 0; j < nd.dims[1]; j++)
+                {
+                    for (int k = 0; k < nd.dims[2]; k++)
+                    {
+                        output[i, j, k] = (T)nd[i, j, k];
+                    }
+                }
+            }
+
+            return output;
+        }
+        private static System.Array ConvertTo4dArray<T>(ndarray nd)
+        {
+            T[,,,] output = new T[nd.dims[0], nd.dims[1], nd.dims[2], nd.dims[3]];
+
+            for (int i = 0; i < nd.dims[0]; i++)
+            {
+                for (int j = 0; j < nd.dims[1]; j++)
+                {
+                    for (int k = 0; k < nd.dims[2]; k++)
+                    {
+                        for (int l = 0; l < nd.dims[3]; l++)
+                        {
+                            output[i, j, k, l] = (T)nd[i, j, k, l];
+                        }
+                    }
+                }
+            }
+
+            return output;
+        }
+        private static System.Array ConvertTo5dArray<T>(ndarray nd)
+        {
+            T[,,,,] output = new T[nd.dims[0], nd.dims[1], nd.dims[2], nd.dims[3], nd.dims[4]];
+
+            for (int i = 0; i < nd.dims[0]; i++)
+            {
+                for (int j = 0; j < nd.dims[1]; j++)
+                {
+                    for (int k = 0; k < nd.dims[2]; k++)
+                    {
+                        for (int l = 0; l < nd.dims[3]; l++)
+                        {
+                            for (int m = 0; m < nd.dims[4]; m++)
+                            {
+                                output[i, j, k, l, m] = (T)nd[i, j, k, l, m];
+                            }
+                        }
+                    }
+                }
+            }
+
+            return output;
+        }
+        private static System.Array ConvertTo6dArray<T>(ndarray nd)
+        {
+            T[,,,,,] output = new T[nd.dims[0], nd.dims[1], nd.dims[2], nd.dims[3], nd.dims[4], nd.dims[5]];
+
+            for (int i = 0; i < nd.dims[0]; i++)
+            {
+                for (int j = 0; j < nd.dims[1]; j++)
+                {
+                    for (int k = 0; k < nd.dims[2]; k++)
+                    {
+                        for (int l = 0; l < nd.dims[3]; l++)
+                        {
+                            for (int m = 0; m < nd.dims[4]; m++)
+                            {
+                                for (int n = 0; n < nd.dims[5]; n++)
+                                {
+                                    output[i, j, k, l, m, n] = (T)nd[i, j, k, l, m, n];
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            return output;
+        }
+        private static System.Array ConvertTo7dArray<T>(ndarray nd)
+        {
+            T[,,,,,,] output = new T[nd.dims[0], nd.dims[1], nd.dims[2], nd.dims[3], nd.dims[4], nd.dims[5], nd.dims[6]];
+
+            for (int i = 0; i < nd.dims[0]; i++)
+            {
+                for (int j = 0; j < nd.dims[1]; j++)
+                {
+                    for (int k = 0; k < nd.dims[2]; k++)
+                    {
+                        for (int l = 0; l < nd.dims[3]; l++)
+                        {
+                            for (int m = 0; m < nd.dims[4]; m++)
+                            {
+                                for (int n = 0; n < nd.dims[5]; n++)
+                                {
+                                    for (int o = 0; o < nd.dims[6]; o++)
+                                    {
+                                        output[i, j, k, l, m, n,o] = (T)nd[i, j, k, l, m, n, o];
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            return output;
+        }
+        private static System.Array ConvertTo8dArray<T>(ndarray nd)
+        {
+            T[,,,,,,,] output = new T[nd.dims[0], nd.dims[1], nd.dims[2], nd.dims[3], nd.dims[4], nd.dims[5], nd.dims[6], nd.dims[7]];
+
+            for (int i = 0; i < nd.dims[0]; i++)
+            {
+                for (int j = 0; j < nd.dims[1]; j++)
+                {
+                    for (int k = 0; k < nd.dims[2]; k++)
+                    {
+                        for (int l = 0; l < nd.dims[3]; l++)
+                        {
+                            for (int m = 0; m < nd.dims[4]; m++)
+                            {
+                                for (int n = 0; n < nd.dims[5]; n++)
+                                {
+                                    for (int o = 0; o < nd.dims[6]; o++)
+                                    {
+                                        for (int p = 0; p < nd.dims[7]; p++)
+                                        {
+                                            output[i, j, k, l, m, n, o, p] = (T)nd[i, j, k, l, m, n, o, p];
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            return output;
+        }
+        private static System.Array ConvertTo9dArray<T>(ndarray nd)
+        {
+            T[,,,,,,,,] output = new T[nd.dims[0], nd.dims[1], nd.dims[2], nd.dims[3], nd.dims[4], nd.dims[5], nd.dims[6], nd.dims[7], nd.dims[8]];
+
+            for (int i = 0; i < nd.dims[0]; i++)
+            {
+                for (int j = 0; j < nd.dims[1]; j++)
+                {
+                    for (int k = 0; k < nd.dims[2]; k++)
+                    {
+                        for (int l = 0; l < nd.dims[3]; l++)
+                        {
+                            for (int m = 0; m < nd.dims[4]; m++)
+                            {
+                                for (int n = 0; n < nd.dims[5]; n++)
+                                {
+                                    for (int o = 0; o < nd.dims[6]; o++)
+                                    {
+                                        for (int p = 0; p < nd.dims[7]; p++)
+                                        {
+                                            for (int q = 0; q < nd.dims[8]; q++)
+                                            {
+                                                output[i, j, k, l, m, n, o, p, q] = (T)nd[i, j, k, l, m, n, o, p, q];
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            return output;
+        }
+        private static System.Array ConvertTo10dArray<T>(ndarray nd)
+        {
+            T[,,,,,,,,,] output = new T[nd.dims[0], nd.dims[1], nd.dims[2], nd.dims[3], nd.dims[4], nd.dims[5], nd.dims[6], nd.dims[7], nd.dims[8], nd.dims[9]];
+
+            for (int i = 0; i < nd.dims[0]; i++)
+            {
+                for (int j = 0; j < nd.dims[1]; j++)
+                {
+                    for (int k = 0; k < nd.dims[2]; k++)
+                    {
+                        for (int l = 0; l < nd.dims[3]; l++)
+                        {
+                            for (int m = 0; m < nd.dims[4]; m++)
+                            {
+                                for (int n = 0; n < nd.dims[5]; n++)
+                                {
+                                    for (int o = 0; o < nd.dims[6]; o++)
+                                    {
+                                        for (int p = 0; p < nd.dims[7]; p++)
+                                        {
+                                            for (int q = 0; q < nd.dims[8]; q++)
+                                            {
+                                                for (int r = 0; r < nd.dims[9]; r++)
+                                                {
+                                                    output[i, j, k, l, m, n, o, p, q,r] = (T)nd[i, j, k, l, m, n, o, p, q, r];
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            return output;
+        }
+        private static System.Array ConvertTo11dArray<T>(ndarray nd)
+        {
+            T[,,,,,,,,,,] output = new T[nd.dims[0], nd.dims[1], nd.dims[2], nd.dims[3], nd.dims[4], nd.dims[5], nd.dims[6], nd.dims[7], nd.dims[8], nd.dims[9], nd.dims[10]];
+
+            for (int i = 0; i < nd.dims[0]; i++)
+            {
+                for (int j = 0; j < nd.dims[1]; j++)
+                {
+                    for (int k = 0; k < nd.dims[2]; k++)
+                    {
+                        for (int l = 0; l < nd.dims[3]; l++)
+                        {
+                            for (int m = 0; m < nd.dims[4]; m++)
+                            {
+                                for (int n = 0; n < nd.dims[5]; n++)
+                                {
+                                    for (int o = 0; o < nd.dims[6]; o++)
+                                    {
+                                        for (int p = 0; p < nd.dims[7]; p++)
+                                        {
+                                            for (int q = 0; q < nd.dims[8]; q++)
+                                            {
+                                                for (int r = 0; r < nd.dims[9]; r++)
+                                                {
+                                                    for (int s = 0; s < nd.dims[10]; s++)
+                                                    {
+                                                        output[i, j, k, l, m, n, o, p, q, r, s] = (T)nd[i, j, k, l, m, n, o, p, q, r, s];
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            return output;
+        }
+        private static System.Array ConvertTo12dArray<T>(ndarray nd)
+        {
+            T[,,,,,,,,,,,] output = new T[nd.dims[0], nd.dims[1], nd.dims[2], nd.dims[3], nd.dims[4], nd.dims[5], nd.dims[6], nd.dims[7], nd.dims[8], nd.dims[9], nd.dims[10], nd.dims[11]];
+
+            for (int i = 0; i < nd.dims[0]; i++)
+            {
+                for (int j = 0; j < nd.dims[1]; j++)
+                {
+                    for (int k = 0; k < nd.dims[2]; k++)
+                    {
+                        for (int l = 0; l < nd.dims[3]; l++)
+                        {
+                            for (int m = 0; m < nd.dims[4]; m++)
+                            {
+                                for (int n = 0; n < nd.dims[5]; n++)
+                                {
+                                    for (int o = 0; o < nd.dims[6]; o++)
+                                    {
+                                        for (int p = 0; p < nd.dims[7]; p++)
+                                        {
+                                            for (int q = 0; q < nd.dims[8]; q++)
+                                            {
+                                                for (int r = 0; r < nd.dims[9]; r++)
+                                                {
+                                                    for (int s = 0; s < nd.dims[10]; s++)
+                                                    {
+                                                        for (int t = 0; t < nd.dims[11]; t++)
+                                                        {
+                                                            output[i, j, k, l, m, n, o, p, q, r, s, t] = (T)nd[i, j, k, l, m, n, o, p, q, r, s, t];
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            return output;
+        }
+        private static System.Array ConvertTo13dArray<T>(ndarray nd)
+        {
+            T[,,,,,,,,,,,,] output = new T[nd.dims[0], nd.dims[1], nd.dims[2], nd.dims[3], nd.dims[4], nd.dims[5], nd.dims[6], nd.dims[7], nd.dims[8], nd.dims[9], nd.dims[10], nd.dims[11], nd.dims[12]];
+
+            for (int i = 0; i < nd.dims[0]; i++)
+            {
+                for (int j = 0; j < nd.dims[1]; j++)
+                {
+                    for (int k = 0; k < nd.dims[2]; k++)
+                    {
+                        for (int l = 0; l < nd.dims[3]; l++)
+                        {
+                            for (int m = 0; m < nd.dims[4]; m++)
+                            {
+                                for (int n = 0; n < nd.dims[5]; n++)
+                                {
+                                    for (int o = 0; o < nd.dims[6]; o++)
+                                    {
+                                        for (int p = 0; p < nd.dims[7]; p++)
+                                        {
+                                            for (int q = 0; q < nd.dims[8]; q++)
+                                            {
+                                                for (int r = 0; r < nd.dims[9]; r++)
+                                                {
+                                                    for (int s = 0; s < nd.dims[10]; s++)
+                                                    {
+                                                        for (int t = 0; t < nd.dims[11]; t++)
+                                                        {
+                                                            for (int u = 0; u < nd.dims[12]; u++)
+                                                            {
+                                                                output[i, j, k, l, m, n, o, p, q, r, s, t, u] = (T)nd[i, j, k, l, m, n, o, p, q, r, s, t, u];
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            return output;
+        }
+        private static System.Array ConvertTo14dArray<T>(ndarray nd)
+        {
+            T[,,,,,,,,,,,,,] output = new T[nd.dims[0], nd.dims[1], nd.dims[2], nd.dims[3], nd.dims[4], nd.dims[5], nd.dims[6], nd.dims[7], nd.dims[8], nd.dims[9], nd.dims[10], nd.dims[11], nd.dims[12], nd.dims[13]];
+
+            for (int i = 0; i < nd.dims[0]; i++)
+            {
+                for (int j = 0; j < nd.dims[1]; j++)
+                {
+                    for (int k = 0; k < nd.dims[2]; k++)
+                    {
+                        for (int l = 0; l < nd.dims[3]; l++)
+                        {
+                            for (int m = 0; m < nd.dims[4]; m++)
+                            {
+                                for (int n = 0; n < nd.dims[5]; n++)
+                                {
+                                    for (int o = 0; o < nd.dims[6]; o++)
+                                    {
+                                        for (int p = 0; p < nd.dims[7]; p++)
+                                        {
+                                            for (int q = 0; q < nd.dims[8]; q++)
+                                            {
+                                                for (int r = 0; r < nd.dims[9]; r++)
+                                                {
+                                                    for (int s = 0; s < nd.dims[10]; s++)
+                                                    {
+                                                        for (int t = 0; t < nd.dims[11]; t++)
+                                                        {
+                                                            for (int u = 0; u < nd.dims[12]; u++)
+                                                            {
+                                                                for (int v = 0; v < nd.dims[13]; v++)
+                                                                {
+                                                                   output[i, j, k, l, m, n, o, p, q, r, s, t, u, v] = (T)nd[i, j, k, l, m, n, o, p, q, r, s, t, u, v];
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            return output;
+        }
+        private static System.Array ConvertTo15dArray<T>(ndarray nd)
+        {
+            T[,,,,,,,,,,,,,,] output = new T[nd.dims[0], nd.dims[1], nd.dims[2], nd.dims[3], nd.dims[4], nd.dims[5], nd.dims[6], nd.dims[7], nd.dims[8], nd.dims[9], nd.dims[10], nd.dims[11], nd.dims[12], nd.dims[13], nd.dims[14]];
+
+            for (int i = 0; i < nd.dims[0]; i++)
+            {
+                for (int j = 0; j < nd.dims[1]; j++)
+                {
+                    for (int k = 0; k < nd.dims[2]; k++)
+                    {
+                        for (int l = 0; l < nd.dims[3]; l++)
+                        {
+                            for (int m = 0; m < nd.dims[4]; m++)
+                            {
+                                for (int n = 0; n < nd.dims[5]; n++)
+                                {
+                                    for (int o = 0; o < nd.dims[6]; o++)
+                                    {
+                                        for (int p = 0; p < nd.dims[7]; p++)
+                                        {
+                                            for (int q = 0; q < nd.dims[8]; q++)
+                                            {
+                                                for (int r = 0; r < nd.dims[9]; r++)
+                                                {
+                                                    for (int s = 0; s < nd.dims[10]; s++)
+                                                    {
+                                                        for (int t = 0; t < nd.dims[11]; t++)
+                                                        {
+                                                            for (int u = 0; u < nd.dims[12]; u++)
+                                                            {
+                                                                for (int v = 0; v < nd.dims[13]; v++)
+                                                                {
+                                                                    for (int w = 0; w < nd.dims[14]; w++)
+                                                                    {
+                                                                        output[i, j, k, l, m, n, o, p, q, r, s, t, u, v, w] = (T)nd[i, j, k, l, m, n, o, p, q, r, s, t, u, v, w];
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            return output;
+        }
+        private static System.Array ConvertTo16dArray<T>(ndarray nd)
+        {
+            T[,,,,,,,,,,,,,,,] output = new T[nd.dims[0], nd.dims[1], nd.dims[2], nd.dims[3], nd.dims[4], nd.dims[5], nd.dims[6], nd.dims[7], nd.dims[8], nd.dims[9], nd.dims[10], nd.dims[11], nd.dims[12], nd.dims[13], nd.dims[14], nd.dims[15]];
+
+            for (int i = 0; i < nd.dims[0]; i++)
+            {
+                for (int j = 0; j < nd.dims[1]; j++)
+                {
+                    for (int k = 0; k < nd.dims[2]; k++)
+                    {
+                        for (int l = 0; l < nd.dims[3]; l++)
+                        {
+                            for (int m = 0; m < nd.dims[4]; m++)
+                            {
+                                for (int n = 0; n < nd.dims[5]; n++)
+                                {
+                                    for (int o = 0; o < nd.dims[6]; o++)
+                                    {
+                                        for (int p = 0; p < nd.dims[7]; p++)
+                                        {
+                                            for (int q = 0; q < nd.dims[8]; q++)
+                                            {
+                                                for (int r = 0; r < nd.dims[9]; r++)
+                                                {
+                                                    for (int s = 0; s < nd.dims[10]; s++)
+                                                    {
+                                                        for (int t = 0; t < nd.dims[11]; t++)
+                                                        {
+                                                            for (int u = 0; u < nd.dims[12]; u++)
+                                                            {
+                                                                for (int v = 0; v < nd.dims[13]; v++)
+                                                                {
+                                                                    for (int w = 0; w < nd.dims[14]; w++)
+                                                                    {
+                                                                        for (int x = 0; x < nd.dims[15]; x++)
+                                                                        {
+                                                                            output[i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x] = (T)nd[i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x];
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            return output;
+        }
+        private static System.Array ConvertTo17dArray<T>(ndarray nd)
+        {
+            T[,,,,,,,,,,,,,,,,] output = new T[nd.dims[0], nd.dims[1], nd.dims[2], nd.dims[3], nd.dims[4], nd.dims[5], nd.dims[6], nd.dims[7], nd.dims[8], nd.dims[9], nd.dims[10], nd.dims[11], nd.dims[12], nd.dims[13], nd.dims[14], nd.dims[15], nd.dims[16]];
+
+            for (int i = 0; i < nd.dims[0]; i++)
+            {
+                for (int j = 0; j < nd.dims[1]; j++)
+                {
+                    for (int k = 0; k < nd.dims[2]; k++)
+                    {
+                        for (int l = 0; l < nd.dims[3]; l++)
+                        {
+                            for (int m = 0; m < nd.dims[4]; m++)
+                            {
+                                for (int n = 0; n < nd.dims[5]; n++)
+                                {
+                                    for (int o = 0; o < nd.dims[6]; o++)
+                                    {
+                                        for (int p = 0; p < nd.dims[7]; p++)
+                                        {
+                                            for (int q = 0; q < nd.dims[8]; q++)
+                                            {
+                                                for (int r = 0; r < nd.dims[9]; r++)
+                                                {
+                                                    for (int s = 0; s < nd.dims[10]; s++)
+                                                    {
+                                                        for (int t = 0; t < nd.dims[11]; t++)
+                                                        {
+                                                            for (int u = 0; u < nd.dims[12]; u++)
+                                                            {
+                                                                for (int v = 0; v < nd.dims[13]; v++)
+                                                                {
+                                                                    for (int w = 0; w < nd.dims[14]; w++)
+                                                                    {
+                                                                        for (int x = 0; x < nd.dims[15]; x++)
+                                                                        {
+                                                                            for (int y = 0; y < nd.dims[16]; y++)
+                                                                            {
+                                                                                output[i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y] = (T)nd[i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y];
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            return output;
+        }
+        private static System.Array ConvertTo18dArray<T>(ndarray nd)
+        {
+            T[,,,,,,,,,,,,,,,,,] output = new T[nd.dims[0], nd.dims[1], nd.dims[2], nd.dims[3], nd.dims[4], nd.dims[5], nd.dims[6], nd.dims[7], nd.dims[8], nd.dims[9], nd.dims[10], nd.dims[11], nd.dims[12], nd.dims[13], nd.dims[14], nd.dims[15], nd.dims[16], nd.dims[17]];
+
+            for (int i = 0; i < nd.dims[0]; i++)
+            {
+                for (int j = 0; j < nd.dims[1]; j++)
+                {
+                    for (int k = 0; k < nd.dims[2]; k++)
+                    {
+                        for (int l = 0; l < nd.dims[3]; l++)
+                        {
+                            for (int m = 0; m < nd.dims[4]; m++)
+                            {
+                                for (int n = 0; n < nd.dims[5]; n++)
+                                {
+                                    for (int o = 0; o < nd.dims[6]; o++)
+                                    {
+                                        for (int p = 0; p < nd.dims[7]; p++)
+                                        {
+                                            for (int q = 0; q < nd.dims[8]; q++)
+                                            {
+                                                for (int r = 0; r < nd.dims[9]; r++)
+                                                {
+                                                    for (int s = 0; s < nd.dims[10]; s++)
+                                                    {
+                                                        for (int t = 0; t < nd.dims[11]; t++)
+                                                        {
+                                                            for (int u = 0; u < nd.dims[12]; u++)
+                                                            {
+                                                                for (int v = 0; v < nd.dims[13]; v++)
+                                                                {
+                                                                    for (int w = 0; w < nd.dims[14]; w++)
+                                                                    {
+                                                                        for (int x = 0; x < nd.dims[15]; x++)
+                                                                        {
+                                                                            for (int y = 0; y < nd.dims[16]; y++)
+                                                                            {
+                                                                                for (int z = 0; z < nd.dims[17]; z++)
+                                                                                {
+                                                                                    output[i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y, z] = (T)nd[i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y, z];
+                                                                                }
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            return output;
+        }
+#endif
+
         /// <summary>
         /// Compute the arithmetic mean
         /// </summary>
@@ -1082,7 +1911,7 @@ namespace NumpyDotNet
 
     public static partial class np
     {
-        #region as(.NET System.Array)
+#region as(.NET System.Array)
 
         /// <summary>
         /// Returns bool array.  Converts if necessary
@@ -1362,7 +2191,7 @@ namespace NumpyDotNet
 
             return arr;
         }
-        #endregion
+#endregion
     }
 
 }

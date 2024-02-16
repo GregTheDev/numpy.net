@@ -46,8 +46,41 @@ namespace NumpyDotNet
 {
     public static partial class np
     {
+        public class random_serializable
+        {
+            public string randomGeneratorSerializationData;
+
+            public int pos;
+            public bool has_gauss; /* !=0: gauss contains a gaussian deviate */
+            public double gauss;
+
+            ///* The rk_state structure has been extended to store the following
+            // * information for the binomial generator. If the input values of n or p
+            // * are different than nsave and psave, then the other parameters will be
+            // * recomputed. RTK 2005-09-02 */
+
+            public bool has_binomial; /* !=0: following parameters initialized for binomial */
+            public double psave;
+            public long nsave;
+            public double r;
+            public double q;
+            public double fm;
+            public long m;
+            public double p1;
+            public double xm;
+            public double xl;
+            public double xr;
+            public double c;
+            public double laml;
+            public double lamr;
+            public double p2;
+            public double p3;
+            public double p4;
+        }
+
         public class random
         {
+            IRandomGenerator _rndGenerator;
             private rk_state internal_state = null;
 
             private object rk_lock = new object();
@@ -104,7 +137,66 @@ namespace NumpyDotNet
                 }
                 internal_state = new rk_state(rndGenerator);
                 seed(null);
+                _rndGenerator = rndGenerator;
             }
+
+            public random_serializable ToSerialization()
+            {
+                random_serializable serializationData = new random_serializable();
+                serializationData.randomGeneratorSerializationData = _rndGenerator.ToSerialization();
+
+                serializationData.pos = internal_state.pos;
+                serializationData.has_gauss = internal_state.has_gauss;
+                serializationData.gauss = internal_state.gauss;
+
+                serializationData.has_binomial = internal_state.has_binomial;
+                serializationData.psave = internal_state.psave;
+                serializationData.nsave = internal_state.nsave;
+                serializationData.r = internal_state.r;
+                serializationData.q = internal_state.q;
+                serializationData.fm = internal_state.fm;
+                serializationData.m = internal_state.m;
+                serializationData.p1 = internal_state.p1;
+                serializationData.xm = internal_state.xm;
+                serializationData.xl = internal_state.xl;
+                serializationData.xr = internal_state.xr;
+                serializationData.c = internal_state.c;
+                serializationData.laml = internal_state.laml;
+                serializationData.lamr = internal_state.lamr;
+                serializationData.p2 = internal_state.p2;
+                serializationData.p3 = internal_state.p3;
+                serializationData.p4 = internal_state.p4;
+
+                return serializationData;
+            }
+
+            public void FromSerialization(random_serializable serializationData)
+            {
+                internal_state.pos = serializationData.pos;
+                internal_state.has_gauss = serializationData.has_gauss;
+                internal_state.gauss = serializationData.gauss;
+
+                internal_state.has_binomial = serializationData.has_binomial;
+                internal_state.psave = serializationData.psave;
+                internal_state.nsave = serializationData.nsave;
+                internal_state.r = serializationData.r;
+                internal_state.q = serializationData.q;
+                internal_state.fm = serializationData.fm;
+                internal_state.m = serializationData.m;
+                internal_state.p1 = serializationData.p1;
+                internal_state.xm = serializationData.xm;
+                internal_state.xl = serializationData.xl;
+                internal_state.xr = serializationData.xr;
+                internal_state.c = serializationData.c;
+                internal_state.laml = serializationData.laml;
+                internal_state.lamr = serializationData.lamr;
+                internal_state.p2 = serializationData.p2;
+                internal_state.p3 = serializationData.p3;
+                internal_state.p4 = serializationData.p4;
+
+                _rndGenerator.FromSerialization(serializationData.randomGeneratorSerializationData);
+            }
+
 
             #endregion
 
@@ -487,9 +579,192 @@ namespace NumpyDotNet
 
             #region choice
 
-            public ndarray choice(object a, Int32 size, bool replace = true, object p = null)
+            public ndarray choice(Int64 a, shape size = null, bool replace = true, double [] p = null)
             {
-                throw new NotImplementedException("This function is not implemented in NumpyDotNet");
+                return choice((object)a, size, replace, p);
+            }
+
+            public ndarray choice(object a, shape size = null, bool replace = true, double [] p = null)
+            {
+                Int64 pop_size = 0;
+
+                // Format and Verify input
+                ndarray aa = np.array(a, copy : false);
+                if (aa.ndim == 0)
+                {
+                    if (aa.TypeNum != NPY_TYPES.NPY_INT64)
+                    {
+                        throw new ValueError("a must be a 1-dimensional or an integer");
+                    }
+
+                    pop_size = (Int64)aa;
+                    if (pop_size <= 0)
+                    {
+                        throw new ValueError("a must be greater than 0");
+                    }
+                }
+                else if (aa.ndim != 1)
+                {
+                    throw new ValueError("a must be 1 dimensional");
+                }
+                else
+                {
+                    pop_size = aa.shape[0];
+                    if (pop_size == 0)
+                    {
+                        throw new ValueError("a must be non-empty");
+                    }
+                }
+
+                ndarray _p = null;
+                if (p != null)
+                {
+
+                    //double atol = np.sqrt(np.finfo(np.float64).eps)
+                    double atol = 0.0001;
+
+                    _p = np.array(p);
+
+                    if (_p.ndim != 1)
+                        throw new ValueError("p must be 1 dimensional");
+                    if (_p.size != pop_size)
+                        throw new ValueError("a and p must have same size");
+                    if (np.anyb(_p < 0))
+                        throw new ValueError("probabilities are not non-negative");
+                    if (Math.Abs(kahan_sum(p) - 1.0) > atol)
+                        throw new ValueError("probabilities do not sum to 1");
+
+                }
+
+                Int64 _size = 0;
+                shape shape = size;
+                if (size != null)
+                {
+                    _size = (Int64)np.prod(np.asanyarray(size.iDims));
+                }
+                else
+                {
+                    _size = 1;
+                }
+
+                // Actual sampling
+                ndarray idx = null;
+                if (replace)
+                {
+                    if (_p != null)
+                    {
+                        var cdf = _p.cumsum();
+                        cdf /= cdf[-1];
+                        var uniform_samples = random_sample(shape);
+                        idx = cdf.searchsorted(uniform_samples, side: NPY_SEARCHSIDE.NPY_SEARCHRIGHT);
+                        idx = np.array(idx, copy: false);
+                    }
+                    else
+                    {
+                        idx = randint(0, (ulong)pop_size, newshape: shape);
+                    }
+                }
+                else
+                {
+                    if (_size > pop_size)
+                    {
+                        throw new ValueError("Cannot take a larger sample than population when 'replace=False'");
+                    }
+
+                    if (_p != null)
+                    {
+                        if (Convert.ToInt64(np.count_nonzero(_p > 0).GetItem(0)) < _size)
+                        {
+                            throw new ValueError("Fewer non-zero entries in p than size");
+                        }
+
+                        npy_intp n_uniq = 0;
+                        _p = _p.Copy();
+                        var found = np.zeros(shape, dtype: np.Int32);
+                        var flat_found = found.ravel();
+
+                        while (n_uniq < _size)
+                        {
+                            var x = rand(new shape(_size - n_uniq));
+                            if (n_uniq > 0)
+                            {
+                                _p[flat_found["0:" + n_uniq.ToString()]] = 0;
+                            }
+                            var cdf = np.cumsum(_p);
+                            cdf /= cdf[-1];
+
+                            var _new = cdf.searchsorted(x, side: NPY_SEARCHSIDE.NPY_SEARCHRIGHT);
+                            var unique_retval = np.unique(_new, return_index : true);
+                            unique_retval.indices.Sort();
+                            _new = np.take(_new, unique_retval.indices);
+                            flat_found[n_uniq.ToString() +  ":" + (n_uniq + _new.size).ToString()] = _new;
+                            n_uniq += _new.size;
+                        }
+                        idx = found;
+                    }
+                    else
+                    {
+                        ndarray t1 = permutation(pop_size);
+                        idx = t1[":" + size.ToString()] as ndarray;
+                        if (shape != null)
+                        {
+                            NpyCoreApi.SetArrayDimsOrStrides(idx, shape.iDims, shape.iDims.Length, true);
+                        }
+                    }
+                }
+
+       
+                // Use samples as indices for a if a is array-like
+                if (aa.ndim == 0)
+                {
+                    // In most cases a scalar will have been made an array
+                    if (shape == null)
+                    {
+                        Int32 _idx = (Int32)idx;
+                        return np.array(_idx);
+                    }
+                    else
+                    {
+                        return idx;
+                    }
+                }
+
+                if (shape != null && idx.ndim == 0)
+                {
+                    throw new Exception("don't currently handle this specific value case");
+
+                    //# If size == () then the user requested a 0-d array as opposed to
+                    //# a scalar object when size is None. However a[idx] is always a
+                    //# scalar and not an array. So this makes sure the result is an
+                    //# array, taking into account that np.array(item) may not work
+                    //# for object arrays.
+                    //res = np.empty((), dtype = a.dtype)
+                    //res[()] = a[idx]
+                    //return res
+                }
+
+                return np.array(aa[idx]);
+
+            }
+
+            private double kahan_sum(double[] darr)
+            {
+                double c, y, t, sum;
+                npy_intp i;
+
+                sum = darr[0];
+                c = 0.0;
+
+                int n = darr.Length;
+                for (i = 1; i < n; i++)
+                {
+                    y = darr[i] - c;
+                    t = sum + y;
+                    c = (t - sum) - y;
+                    sum = t;
+                }
+
+                return sum;
             }
 
             #endregion

@@ -51,6 +51,22 @@ namespace NumpyDotNet {
     /// </summary>
     public static partial class np
     {     
+        public static class tuning
+        {
+            /// <summary>
+            /// enable/disable try catch around calculations.  
+            /// Disabling will likely increase performance but crash the application if exception taken during calculation
+            /// </summary>
+            public static bool EnableTryCatchOnCalculations
+            {
+                get { return numpyinternal.getEnableTryCatchOnCalculations; }
+                set
+                {
+                    numpyinternal.enableTryCatchOnCalculations = value;
+                }
+            }
+        }
+   
   
         /// <summary>
         /// Copies the source object into the destination array.  src can be

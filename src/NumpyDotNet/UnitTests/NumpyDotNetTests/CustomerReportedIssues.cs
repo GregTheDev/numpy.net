@@ -801,7 +801,7 @@ namespace NumpyDotNetTests
             AssertArray(np.array(l.ToArray()), new npy_intp[] { 2, 4 });
 
             var m = A.shape[":"];
-            AssertArray(np.array(m.ToArray()), new npy_intp[] {3, 2, 2, 4 });
+            AssertArray(np.array(m.ToArray()), new npy_intp[] { 3, 2, 2, 4 });
 
             var n = A.shape["::"];
             AssertArray(np.array(n.ToArray()), new npy_intp[] { 3, 2, 2, 4 });
@@ -816,7 +816,7 @@ namespace NumpyDotNetTests
             var i = A.shape[new Slice(1)];
             AssertArray(np.array(i.ToArray()), new npy_intp[] { 2, 2, 4 });
 
-            var j = A.shape[new Slice(1,2)];
+            var j = A.shape[new Slice(1, 2)];
             AssertArray(np.array(j.ToArray()), new npy_intp[] { 2 });
 
             var k = A.shape[new Slice(0, 2)];
@@ -837,10 +837,10 @@ namespace NumpyDotNetTests
         [TestMethod]
         public void test_SimonCraenen_1()
         {
-            ndarray a = np.arange(0,4, dtype: np.Float32);
+            ndarray a = np.arange(0, 4, dtype: np.Float32);
             var abytes = a.tobytes(NumpyLib.NPY_ORDER.NPY_CORDER);
 
-            ndarray b = np.frombuffer(abytes, dtype : np.Float32);
+            ndarray b = np.frombuffer(abytes, dtype: np.Float32);
             AssertArray(b, new float[] { 0, 1, 2, 3 });
 
             /////////////
@@ -858,7 +858,7 @@ namespace NumpyDotNetTests
             AssertArray(b, new sbyte[] { 0, 1, 2, 3 });
 
             /////////////
-            a = np.arange(0, 8, dtype: np.UInt16).reshape(4,2);
+            a = np.arange(0, 8, dtype: np.UInt16).reshape(4, 2);
             abytes = a.tobytes(NumpyLib.NPY_ORDER.NPY_CORDER);
 
             b = np.frombuffer(abytes, dtype: np.UInt16);
@@ -888,7 +888,7 @@ namespace NumpyDotNetTests
             b = np.frombuffer(abytes, dtype: np.Float64);
             AssertArray(b, new double[] { 0, 1, 2, 3, 4, 5, 6, 7 });
 
-            b = np.frombuffer(abytes, dtype: null, count:32, offset: 8);
+            b = np.frombuffer(abytes, dtype: null, count: 32, offset: 8);
             AssertArray(b, new double[] { 1, 2, 3, 4 });
 
             /////////////
@@ -910,5 +910,703 @@ namespace NumpyDotNetTests
             return;
         }
 
+        [TestMethod]
+        public void test_Rainyl_1a()
+        {
+            var arr = np.array(new Int32[] { -9, 7, 5, 3, 1, -1, -3, -5, -11, 13, 17, 21 }).reshape(4, 3);
+            var idx2 = np.argsort(arr);
+            print(arr);
+            print(idx2);
+
+            var x = arr.T[0, ":"] as ndarray;
+            var y = arr.T[1, ":"] as ndarray;
+
+            var idx = np.argsort(x);
+            AssertArray(idx, new npy_intp[] { 0, 2, 1, 3 });
+            print(x);
+            print(idx);
+
+            idx = np.argsort(y);
+            AssertArray(idx, new npy_intp[] { 2, 1, 0, 3 });
+            print(y);
+            print(idx);
+        }
+
+        [TestMethod]
+        public void test_Rainyl_1b()
+        {
+            var arr = np.array(new Int16[] { -9, 7, 5, 3, 1, -1, -3, -5, -11, 13, 17, 21 }).reshape(4, 3);
+            var idx2 = np.argsort(arr);
+            print(arr);
+            print(idx2);
+
+            var x = arr.T[0, ":"] as ndarray;
+            var y = arr.T[1, ":"] as ndarray;
+
+            var idx = np.argsort(x);
+            AssertArray(idx, new npy_intp[] { 0, 2, 1, 3 });
+            print(x);
+            print(idx);
+
+            idx = np.argsort(y);
+            AssertArray(idx, new npy_intp[] { 2, 1, 0, 3 });
+            print(y);
+            print(idx);
+        }
+
+
+        [TestMethod]
+        public void test_Rainyl_1c()
+        {
+            var arr = np.array(new Int64[] { -9, 7, 5, 3, 1, -1, -3, -5, -11, 13, 17, 21 }).reshape(4, 3);
+            var idx2 = np.argsort(arr);
+            print(arr);
+            print(idx2);
+
+            var x = arr.T[0, ":"] as ndarray;
+            var y = arr.T[1, ":"] as ndarray;
+
+            var idx = np.argsort(x);
+            AssertArray(idx, new npy_intp[] { 0, 2, 1, 3 });
+            print(x);
+            print(idx);
+
+            idx = np.argsort(y);
+            AssertArray(idx, new npy_intp[] { 2, 1, 0, 3 });
+            print(y);
+            print(idx);
+        }
+
+        [TestMethod]
+        public void test_Rainyl_1d()
+        {
+            var arr = np.array(new BigInteger[] { -9, 7, 5, 3, 1, -1, -3, -5, -11, 13, 17, 21 }).reshape(4, 3);
+            var idx2 = np.argsort(arr);
+            print(arr);
+            print(idx2);
+
+            var x = arr.T[0, ":"] as ndarray;
+            var y = arr.T[1, ":"] as ndarray;
+
+            var idx = np.argsort(x);
+            AssertArray(idx, new npy_intp[] { 0, 2, 1, 3 });
+            print(x);
+            print(idx);
+
+            idx = np.argsort(y);
+            AssertArray(idx, new npy_intp[] { 2, 1, 0, 3 });
+            print(y);
+            print(idx);
+        }
+
+        [TestMethod]
+        public void test_Rainyl_2a()
+        {
+            var arr = np.array(new Int32[] { 7, -9, -5, -3, 1, -1, 33, 5, -11, 13, 17, -21 }).reshape(4, 3);
+            var idx2 = np.argsort(arr);
+            print(arr);
+            print(idx2);
+
+            var x = arr.T[":", 0] as ndarray;
+            var y = arr.T[":", 1] as ndarray;
+
+            var idx = np.argsort(x);
+            AssertArray(idx, new npy_intp[] { 1, 2, 0 });
+            print(x);
+            print(idx);
+
+            idx = np.argsort(y);
+            AssertArray(idx, new npy_intp[] { 0, 2, 1 });
+            print(y);
+            print(idx);
+        }
+
+        [TestMethod]
+        public void test_Rainyl_2b()
+        {
+            var arr = np.array(new Int16[] { 7, -9, -5, -3, 1, -1, 33, 5, -11, 13, 17, -21 }).reshape(4, 3);
+            var idx2 = np.argsort(arr);
+            print(arr);
+            print(idx2);
+
+            var x = arr.T[":", 0] as ndarray;
+            var y = arr.T[":", 1] as ndarray;
+
+            var idx = np.argsort(x);
+            AssertArray(idx, new npy_intp[] { 1, 2, 0 });
+            print(x);
+            print(idx);
+
+            idx = np.argsort(y);
+            AssertArray(idx, new npy_intp[] { 0, 2, 1 });
+            print(y);
+            print(idx);
+        }
+
+        [TestMethod]
+        public void test_Rainyl_2c()
+        {
+            var arr = np.array(new Int64[] { 7, -9, -5, -3, 1, -1, 33, 5, -11, 13, 17, -21 }).reshape(4, 3);
+            var idx2 = np.argsort(arr);
+            print(arr);
+            print(idx2);
+
+            var x = arr.T[":", 0] as ndarray;
+            var y = arr.T[":", 1] as ndarray;
+
+            var idx = np.argsort(x);
+            AssertArray(idx, new npy_intp[] { 1, 2, 0 });
+            print(x);
+            print(idx);
+
+            idx = np.argsort(y);
+            AssertArray(idx, new npy_intp[] { 0, 2, 1 });
+            print(y);
+            print(idx);
+        }
+
+        [TestMethod]
+        public void test_Rainyl_2d()
+        {
+            var arr = np.array(new Complex[] { 7, -9, -5, -3, 1, -1, 33, 5, -11, 13, 17, -21 }).reshape(4, 3);
+            var idx2 = np.argsort(arr);
+            print(arr);
+            print(idx2);
+
+            var x = arr.T[":", 0] as ndarray;
+            var y = arr.T[":", 1] as ndarray;
+
+            var idx = np.argsort(x);
+            AssertArray(idx, new npy_intp[] { 1, 2, 0 });
+            print(x);
+            print(idx);
+
+            idx = np.argsort(y);
+            AssertArray(idx, new npy_intp[] { 0, 2, 1 });
+            print(y);
+            print(idx);
+        }
+
+        [TestMethod]
+        public void test_Rainyl_3()
+        {
+            var a = np.asarray(new int[,] { { 1, 2, 3, 4, 5 }, { 10, 11, 12, 13, 14 } });
+            //a = a.flatten();
+            var b = a[":", "::-1"] as ndarray;
+     
+            string Line1Output = string.Format($"output: {b[0, 0]}, {b[0, 1]}, {b[0, 2]}, {b[0, 3]}, {b[0, 4]}");
+            Assert.AreEqual(0, string.Compare("output: 5, 4, 3, 2, 1", Line1Output));
+
+            string Line2Output = string.Format($"output: {b[1, 0]}, {b[1, 1]}, {b[1, 2]}, {b[1, 3]}, {b[1, 4]}");
+            Assert.AreEqual(0, string.Compare("output: 14, 13, 12, 11, 10", Line2Output));
+
+        }
+
+        [TestMethod]
+        public void test_Rainyl_3a()
+        {
+            var a = np.asarray(new int[,] { { 1, 2, 3, 4, 5 }, { 10, 11, 12, 13, 14 } });
+            //a = a.flatten();
+            var b = a["::-1", "::-1"] as ndarray;
+
+
+
+            string Line1Output = string.Format($"output: {b[0, 0]}, {b[0, 1]}, {b[0, 2]}, {b[0, 3]}, {b[0, 4]}");
+            Assert.AreEqual(0, string.Compare("output: 14, 13, 12, 11, 10", Line1Output));
+
+            string Line2Output = string.Format($"output: {b[1, 0]}, {b[1, 1]}, {b[1, 2]}, {b[1, 3]}, {b[1, 4]}");
+            Assert.AreEqual(0, string.Compare("output: 5, 4, 3, 2, 1", Line2Output));
+
+        }
+
+        [TestMethod]
+        public void test_Rainyl_3b()
+        {
+            var a = np.asarray(new int[,] { { 1, 2, 3, 4, 5 }, { 10, 11, 12, 13, 14 } });
+            //a = a.flatten();
+            var b = a["::-2", "::-2"] as ndarray;
+            print(b);
+
+
+            string Line1Output = string.Format($"output: {b[0, 0]}, {b[0, 1]}, {b[0, 2]}");
+            print(Line1Output);
+            Assert.AreEqual(0, string.Compare("output: 14, 12, 10", Line1Output));
+
+            b[0, 0] = 88;
+            b[0, 1] = 77;
+            b[0, 2] = 66;
+
+            string Line2Output = string.Format($"output: {b[0, 0]}, {b[0, 1]}, {b[0, 2]}");
+            print(Line2Output);
+            Assert.AreEqual(0, string.Compare("output: 88, 77, 66", Line2Output));
+
+            AssertArray(a, new int[,] { { 1, 2, 3, 4, 5 }, { 66, 11, 77, 13, 88 } });
+
+            return;
+
+        }
+
+        [TestMethod]
+        public void test_Taz145_1()
+        {
+            ndarray arr1 = np.array(new int[] { 0, 1, 1, 0, 1, 1, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 1, 0 }).reshape((2, 3, 4));
+            ndarray arr2 = np.arange(24).reshape((2, 3, 4));
+
+            print(arr2);
+            arr2 = np.rot90(arr2, k: 2, axes: new int[] { 0, 2 });
+
+            print(arr2);
+            //arr2 = arr2.Copy();
+            arr2[arr1 > 0] = 0;
+            print(arr2);
+
+            AssertArray(arr2, new int[,,] { { { 15, 0, 0, 12 }, { 0, 0, 0, 16 }, { 23, 22, 0, 0 } }, { { 3, 2, 1, 0 }, { 0, 0, 0, 0 }, { 0, 10, 0, 8 } } });
+
+        }
+
+        [TestMethod]
+        public void test_Taz145_1a()
+        {
+            ndarray arr1 = np.array(new int[] { 0, 1, 1, 0, 1, 1, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 1, 0 }).reshape((2, 3, 4));
+            ndarray arr2 = np.arange(24).reshape((2, 3, 4));
+
+            print(arr2);
+            arr2 = arr2["::-1"] as ndarray;
+
+            print(arr2);
+            //arr2 = arr2.Copy();
+            arr2[arr1 > 0] = 0;
+            print(arr2);
+
+            AssertArray(arr2, new int[,,] { { { 12, 0, 0, 15 }, { 0, 0, 0, 19 }, { 20, 21, 0, 0 } }, { { 0, 1, 2, 3 }, { 0, 0, 0, 0 }, { 0, 9, 0, 11 } } });
+        }
+
+        [TestMethod]
+        public void test_Taz145_2()
+        {
+            ndarray arr1 = np.array(new int[] { 0, 1, 1, 0, 1, 1, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 1, 0 }).reshape((2, 3, 4));
+            ndarray arr2 = np.arange(24).reshape((2, 3, 4));
+
+            print(arr2);
+            arr2 = np.rot90(arr2, k: 2, axes: new int[] { 0, 2 });
+
+            print(arr2);
+            ndarray arr3 = arr2[arr1 > 0] as ndarray;
+            print(arr3);
+
+            AssertArray(arr3, new int[] { 14, 13, 19, 18, 17, 21, 20, 7, 6, 5, 4, 11, 9 });
+
+        }
+
+        [TestMethod]
+        public void test_Taz145_2a()
+        {
+            ndarray arr1 = np.array(new int[] { 0, 1, 1, 0, 1, 1, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 1, 0 }).reshape((2, 3, 4));
+            ndarray arr2 = np.arange(24).reshape((2, 3, 4));
+
+            print(arr2);
+            arr2 = arr2["::-1"] as ndarray;
+
+            print(arr2);
+            ndarray arr3 = arr2[arr1 > 0] as ndarray;
+            print(arr3);
+
+            AssertArray(arr3, new int[] { 13, 14, 16, 17, 18, 22, 23, 4, 5, 6, 7, 8, 10 });
+
+        }
+
+        [TestMethod]
+        public void test_Taz145_3()
+        {
+            ndarray arr1 = np.array(new int[] { 2,4,6 });
+            ndarray arr2 = np.arange(24);
+
+            arr2 = arr2["::-1"] as ndarray;
+
+            print(arr2);
+            ndarray arr3 = arr2[arr1] as ndarray;
+            print(arr3);
+
+            AssertArray(arr3, new int[] { 21,19,17 });
+
+        }
+
+        [TestMethod]
+        public void test_Taz145_3a()
+        {
+            ndarray arr2 = np.arange(24).reshape((2, 3, 4));
+
+            print(arr2);
+            arr2 = np.rot90(arr2, k: 2, axes: new int[] { 0, 2 });
+
+            print(arr2);
+            ndarray arr3 = arr2[np.array(new Int64[] { 0, 1, -1, -2 })] as ndarray;
+            print(arr3);
+
+            var ExpectedResult = new int[,,]
+                { { { 15, 14, 13, 12 },
+                    { 19, 18, 17, 16 },
+                    { 23, 22, 21, 20 } },
+                  { { 3, 2, 1, 0 },
+                    { 7, 6, 5, 4 },
+                    { 11, 10, 9, 8 } },
+                  { { 3, 2, 1, 0 },
+                    { 7, 6, 5, 4 },
+                    { 11, 10, 9, 8 } },
+                  { { 15, 14, 13, 12 },
+                    { 19, 18, 17, 16 },
+                  { 23, 22, 21, 20 } }
+               };
+
+            AssertArray(arr3, ExpectedResult);
+
+        }
+
+        [TestMethod]
+        public void test_Taz145_4()
+        {
+            ndarray arr2 = np.arange(24).reshape((2, 3, 4));
+
+
+            arr2 = np.rot90(arr2, k: 2, axes: new int[] { 0, 2 });
+            print(arr2);
+
+            var arr3 = np.array(arr2.tobytes());
+            print(arr3);
+
+            var arr4 = np.array(arr2.tobytes(order:NPY_ORDER.NPY_FORTRANORDER));
+            print(arr4);
+
+        }
+
+        [TestMethod]
+        public void test_Taz145_4a()
+        {
+            ndarray arr2 = np.arange(24).reshape((2, 3, 4));
+
+            arr2 = np.rot90(arr2, k: 2, axes: new int[] { 0, 2 });
+            print(arr2);
+
+            var arr3 = np.array(arr2.tobytes());
+            print(arr3);
+
+            var arr4 = np.array(arr2.tobytes(order: NPY_ORDER.NPY_FORTRANORDER));
+            print(arr4);
+
+        }
+
+        [TestMethod]
+        public void test_Taz145_4b()
+        {
+            ndarray arr2 = np.arange(24).reshape((2, 3, 4));
+
+            arr2 = arr2["::-1"] as ndarray;
+            print(arr2);
+
+            var arr3 = np.array(arr2.tobytes());
+            print(arr3);
+
+            var arr4 = np.array(arr2.tobytes(order: NPY_ORDER.NPY_FORTRANORDER));
+            print(arr4);
+
+        }
+
+        [TestMethod]
+        public void test_Taz145_4c()
+        {
+            ndarray arr2 = np.arange(24).reshape((2, 3, 4));
+
+            arr2 = arr2["1::"] as ndarray;
+            print(arr2);
+
+            var arr3 = np.array(arr2.tobytes());
+            print(arr3);
+
+            var arr4 = np.array(arr2.tobytes(order: NPY_ORDER.NPY_FORTRANORDER));
+            print(arr4);
+
+        }
+
+        [TestMethod]
+        public void test_Sundarrajan06295_DifferentTypes()
+        {
+
+            var x = np.arange(0, 4000 * 10 * 4000, dtype: np.UInt32).reshape(-1, 4000);
+            var y = np.arange(0, 4000 * 10 * 4000, dtype: np.Float64).reshape(-1, 4000);
+
+            System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
+            sw.Start();
+         
+            ndarray z = np.multiply(x, y);
+
+            sw.Stop();
+
+            Console.WriteLine(string.Format("DifferentTypes calculations took {0} milliseconds\n", sw.ElapsedMilliseconds));
+            Console.WriteLine("************\n");
+
+        }
+
+        [TestMethod]
+        public void test_Sundarrajan06295_SameTypes()
+        {
+
+            var x = np.zeros(new shape(4000 * 10, 4000), dtype: np.Float64).reshape(-1, 4000);
+            var y = np.zeros(new shape(4000 * 10, 4000), dtype: np.Float64).reshape(-1, 4000);
+
+            System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
+            sw.Restart();
+
+            double x1 = double.MaxValue;
+            double x2 = double.MaxValue;
+            double x3 = x1 * x2;
+
+
+            np.tuning.EnableTryCatchOnCalculations = true;
+            
+            ndarray z = np.divide(x, y);
+
+            sw.Stop();
+
+            Console.WriteLine(string.Format("SameType calculations took {0} milliseconds\n", sw.ElapsedMilliseconds));
+            Console.WriteLine("************\n");
+
+            sw = new System.Diagnostics.Stopwatch();
+            sw.Restart();
+
+            np.tuning.EnableTryCatchOnCalculations = false;
+            z = np.divide(x, y);
+            np.tuning.EnableTryCatchOnCalculations = true;
+
+            sw.Stop();
+
+            Console.WriteLine(string.Format("SameType calculations took {0} milliseconds\n", sw.ElapsedMilliseconds));
+            Console.WriteLine("************\n");
+
+
+        }
+
+        [TestMethod]
+        public void test_Sundarrajan06295_SameTypes_2()
+        {
+
+            var x = np.arange(0, 4000 * 10 * 4000, dtype: np.Float64);
+            var y = np.arange(0, 4000 * 10 * 4000, dtype: np.Float64);
+
+            System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
+
+            sw.Restart();
+
+            np.tuning.EnableTryCatchOnCalculations = true;
+            ndarray z = np.divide(x, y);
+
+            sw.Stop();
+
+            Console.WriteLine(string.Format("SameType calculations took {0} milliseconds\n", sw.ElapsedMilliseconds));
+            Console.WriteLine("************\n");
+
+            sw.Restart();
+
+            np.tuning.EnableTryCatchOnCalculations = false;
+            z = np.divide(x, y);
+            np.tuning.EnableTryCatchOnCalculations = true;
+
+            sw.Stop();
+
+            Console.WriteLine(string.Format("SameType calculations took {0} milliseconds\n", sw.ElapsedMilliseconds));
+            Console.WriteLine("************\n");
+
+        }
+
+        [TestMethod]
+        public void test_Sundarrajan06295_Quantile_1()
+        {
+            var x = np.arange(0, 4000 * 10 * 4000, dtype: np.Float64);
+
+            ndarray z1 = np.quantile(x, 0.5);
+
+            //return;
+
+            System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
+
+            sw.Restart();
+
+            np.tuning.EnableTryCatchOnCalculations = false;
+            ndarray z = np.quantile(x, 0.5);
+
+            sw.Stop();
+
+            Console.WriteLine(string.Format("SameType calculations took {0} milliseconds\n", sw.ElapsedMilliseconds));
+            Console.WriteLine("************\n");
+
+            sw.Restart();
+
+            np.tuning.EnableTryCatchOnCalculations = false;
+            z = np.quantile(x, 0.5);
+            np.tuning.EnableTryCatchOnCalculations = true;
+
+            sw.Stop();
+
+            Console.WriteLine(string.Format("SameType calculations took {0} milliseconds\n", sw.ElapsedMilliseconds));
+            Console.WriteLine("************\n");
+
+            return;
+        }
+
+        [TestMethod]
+        public void test_Sundarrajan06295_var_1()
+        {
+            ndarray data = np.arange(3815 * 2800, dtype: np.Float32).reshape(3815,2800);
+            var variancex = np.var(data, axis: 1);
+
+
+            System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
+            sw.Restart();
+
+            np.tuning.EnableTryCatchOnCalculations = true;
+            var variance = np.var(data, axis:1);
+            //print(variance);
+
+
+            variance = np.var(data, axis: 0);
+            //print(variance);
+
+            sw.Stop();
+            Console.WriteLine(string.Format("np.var calculations took {0} milliseconds\n", sw.ElapsedMilliseconds));
+
+            np.tuning.EnableTryCatchOnCalculations = false;
+            variance = np.var(data, axis: 1);
+            //print(variance);
+
+
+            variance = np.var(data, axis: 0);
+            //print(variance);
+
+            sw.Stop();
+            Console.WriteLine(string.Format("np.var calculations took {0} milliseconds\n", sw.ElapsedMilliseconds));
+            np.tuning.EnableTryCatchOnCalculations = true;
+
+        }
+
+        [TestMethod]
+        public void test_OleksiiMatiash_1()
+        {
+            string fileName = "xyz.bin";
+
+            int size = 2500000;
+
+            ndarray x = np.array(new Int16[size]);
+
+            System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
+            sw.Restart();
+
+    
+
+                   
+            tofile(x, fileName);
+
+            int length = size - 10;
+            int offset = 10;
+
+            ndarray y = fromfile(fileName, length, offset);
+
+            sw.Stop();
+
+            Console.WriteLine("elapsed time in ms: " + sw.ElapsedMilliseconds.ToString());
+
+            return;
+        }
+
+        [TestMethod]
+        public void test_OleksiiMatiash_2()
+        {
+            string fileName = "xyz.bin";
+
+            int size = 2500000;
+
+            ndarray x = np.array(new Int16[size]);
+
+            System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
+            sw.Restart();
+
+
+
+
+            x.tofile(fileName);
+
+        
+
+            ndarray y = np.fromfile(fileName, dtype: np.Int16);
+
+            sw.Stop();
+
+            Console.WriteLine("elapsed time in ms: " + sw.ElapsedMilliseconds.ToString());
+
+            return;
+        }
+
+        private void tofile(ndarray x, string fileName)
+        {
+            System.IO.FileInfo fp = new System.IO.FileInfo(fileName);
+
+            byte[] b = x.tobytes();
+
+
+            using (var fs = fp.Create())
+            {
+        
+                using (var binaryWriter = new System.IO.BinaryWriter(fs))
+                {
+                    binaryWriter.Write(b);
+                }
+            }
+
+
+        }
+
+        private ndarray fromfile(string fileName, int length, int offset)
+        {
+            System.IO.FileInfo fp = new System.IO.FileInfo(fileName);
+
+            byte[] data = null;
+
+            using (var fs = fp.OpenRead())
+            {
+                fs.Seek(offset * sizeof(Int16), System.IO.SeekOrigin.Begin);
+
+                using (System.IO.BinaryReader sr = new System.IO.BinaryReader(fs))
+                {
+                    data = sr.ReadBytes((length - offset) * sizeof(Int16));
+                }
+       
+            }
+
+            return np.frombuffer(data, dtype: np.Int16);
+
+          //
+
+        }
+
+        [TestMethod]
+        public void test_DeanZhuo_convolve_1()
+        {
+            ndarray hlpf = np.arange(27, dtype : np.Int64);
+            ndarray hhpf = np.arange(35, dtype : np.Int64);
+
+            ndarray a = np.convolve(hlpf, hhpf, NPY_CONVOLE_MODE.NPY_CONVOLVE_FULL);
+            print(a);
+
+            var ExpectedData = new Int64[]
+            {
+                0, 0, 1, 4, 10, 20, 35, 56, 84, 120, 165, 220, 286, 364,
+                455, 560, 680, 816, 969, 1140, 1330, 1540, 1771, 2024, 2300, 2600, 2925, 3276,
+                3627, 3978, 4329, 4680, 5031, 5382, 5733, 6084, 6400, 6680, 6923, 7128, 7294, 7420,
+                7505, 7548, 7548, 7504, 7415, 7280, 7098, 6868, 6589, 6260, 5880, 5448, 4963, 4424,
+                3830, 3180, 2473, 1708, 884
+            };
+
+            AssertArray(a, ExpectedData);
+      
+
+        }
     }
 }

@@ -31,46 +31,23 @@
  */
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-#if NPY_INTP_64
-using npy_intp = System.Int64;
-#else
-using npy_intp = System.Int32;
-#endif
-namespace NumpyLib
+using System.Numerics;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NumpyDotNet;
+using MathNet.Numerics;
+
+namespace NumpyDotNetTests
 {
-    internal partial class numpyinternal
+    [TestClass]
+    public class NpyIOTests
     {
-        private static npy_intp maxParallelIterators = 8;  // must be 1,2,4,8 or16
-        private static npy_intp flatCopyParallelSize = 10000;
-        internal static npy_intp maxIterOffsetCacheSize = 1000;
-
-        private static npy_intp maxNumericOpParallelSize = 1000;
-        private static npy_intp maxCopyFieldParallelSize = 1000;
-        private static npy_intp maxSortOperationParallelSize = 1000;
-
-        [ThreadStatic]
-        internal static bool ?enableTryCatchOnCalculations = null;
-
-        internal static bool getEnableTryCatchOnCalculations
+        [Ignore]
+        [TestMethod]
+        public void test_load_1()
         {
-            get
-            {
-                if (numpyinternal.enableTryCatchOnCalculations.HasValue)
-                    return numpyinternal.enableTryCatchOnCalculations.Value;
-                numpyinternal.enableTryCatchOnCalculations = true;
-                return numpyinternal.enableTryCatchOnCalculations.Value;
-            }
+            ndarray x = np.load("c:/temp/t3.npy");
         }
 
-        internal static string GenerateTryCatchExceptionMessage(string ExMessage)
-        {
-            string Message = string.Format("This operation caused exception: {0}. Set np.tuning.EnableTryCatchOnCalculations = true to handle this exception cleanly.", ExMessage);
-            return Message;
-        }
+
     }
 }
